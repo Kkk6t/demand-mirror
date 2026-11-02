@@ -20,7 +20,7 @@ def to_markdown(p: Project, now: datetime) -> str:
     v = evaluate(p, now)
     L: list[str] = []
     L.append(f"# 验证报告：{p.title}\n")
-    L.append(f"> 由「先别做」生成于 {_fmt(now)}。本报告不打分、不给建议，只记录现在有什么证据。\n")
+    L.append(f"> 由「需求照妖镜」生成于 {_fmt(now)}。本报告不打分、不给建议，只记录现在有什么证据。\n")
 
     L.append("## 判定\n")
     L.append(f"**{v.status.value}**　·　手里最硬的证据：{LEVEL_NAMES[v.highest_level]}\n")

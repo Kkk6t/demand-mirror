@@ -176,7 +176,7 @@ class Project(BaseModel):
     id: str = Field(default_factory=lambda: _id("p"))
     created_at: datetime = Field(default_factory=datetime.now)
     demo: bool = False
-    quick: bool = False  # 用「一键体检」跑出来的
+    quick: bool = False  # 用「照一照」跑出来的
 
     idea: str = ""
     questions: list[Question] = Field(default_factory=list)

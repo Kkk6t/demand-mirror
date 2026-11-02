@@ -1,5 +1,5 @@
 #!/bin/bash
-# 先别做：macOS / Linux 一键启动。macOS 上可以直接双击 run-mac.command。
+# 需求照妖镜：macOS / Linux 一键启动。macOS 上可以直接双击 run-mac.command。
 cd "$(dirname "$0")"
 if ! command -v python3 >/dev/null 2>&1; then
   echo "没有找到 Python 3，请先到 https://www.python.org/downloads/ 安装（3.10 或更高）。"

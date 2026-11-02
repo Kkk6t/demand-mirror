@@ -315,7 +315,7 @@ def criteria_json(p: Project) -> str:
     return json.dumps([c.model_dump(mode="json") for c in p.criteria], ensure_ascii=False)
 
 
-# ---------- 一键体检 ----------
+# ---------- 照一照（一键跑完） ----------
 
 
 def quick_check(p: Project, llm: LLM, searcher: Searcher, now: datetime, progress=lambda msg: None) -> list[str]:

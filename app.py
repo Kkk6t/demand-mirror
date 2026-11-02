@@ -1,4 +1,4 @@
-"""先别做 · Streamlit 界面。运行：streamlit run app.py"""
+"""需求照妖镜 · Streamlit 界面。运行：streamlit run app.py"""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from dby.rules import RuleError, change_criteria, evaluate, lock_criteria
 from dby.search import SearchError
 
 load_dotenv(override=True)
-st.set_page_config(page_title="先别做", page_icon="🔖", layout="centered")
+st.set_page_config(page_title="需求照妖镜", page_icon="🪞", layout="centered")
 st.html(ui.CSS)
 # 页面本身是中文，但 Streamlit 默认把 <html> 标成英文，浏览器会自动"翻译"，
 # 翻译插件改写页面会让 Streamlit 白屏。这里把语言改成中文并禁止翻译。
@@ -128,7 +128,7 @@ with st.sidebar:
             st.rerun()
 
     with st.expander("备份 / 恢复"):
-        st.download_button("下载备份文件", p.model_dump_json(indent=2), file_name=f"先别做-{p.id}.json",
+        st.download_button("下载备份文件", p.model_dump_json(indent=2), file_name=f"需求照妖镜-{p.id}.json",
                            mime="application/json", use_container_width=True)
         up = st.file_uploader("上传备份文件恢复", type="json")
         if up is not None and st.button("恢复", use_container_width=True):
@@ -136,7 +136,7 @@ with st.sidebar:
                 ss.project = Project.model_validate_json(up.getvalue())
                 st.rerun()
             except Exception as err:  # noqa: BLE001
-                st.warning(f"这个文件不是先别做的备份：{err}")
+                st.warning(f"这个文件不是需求照妖镜的备份：{err}")
 
     with st.expander("AI 和搜索设置"):
         preset = st.selectbox("用哪家的 AI", list(PRESETS) + ["自定义"], index=0)
@@ -181,7 +181,7 @@ def connect_box() -> None:
     st.markdown(
         '<div class="notice"><b>先连接 AI</b>。这个工具要用 AI 来分析、搜资料、写帖子，需要一个 DeepSeek 的 API Key：'
         '到 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a> '
-        "注册，充一点余额，点「创建 API Key」，把以 sk- 开头的那串字符复制到下面。一次体检的费用大约几分钱。</div>",
+        "注册，充一点余额，点「创建 API Key」，把以 sk- 开头的那串字符复制到下面。照一次的费用大约几分钱。</div>",
         unsafe_allow_html=True,
     )
     k1, k2 = st.columns([4, 1], vertical_alignment="bottom")
@@ -198,9 +198,9 @@ def connect_box() -> None:
 
 def run_quick(target: Project, use_llm, use_searcher) -> None:
     try:
-        with st.status("正在体检，大约需要 1 分钟…", expanded=True) as box:
+        with st.status("正在照，大约需要 1 分钟…", expanded=True) as box:
             notes = pipeline.quick_check(target, use_llm, use_searcher, now(), progress=box.write)
-            box.update(label="体检完成", state="complete", expanded=False)
+            box.update(label="照好了", state="complete", expanded=False)
     except RuleError as err:
         st.warning(str(err))
         return
@@ -239,7 +239,7 @@ if not started:
     if needs_key:
         connect_box()
     b1, b2 = st.columns(2)
-    go = b1.button("开始体检", type="primary", use_container_width=True)
+    go = b1.button("照一照", type="primary", use_container_width=True)
     peek = b2.button("先看看效果（用示例）", use_container_width=True)
     if go:
         if needs_key:
@@ -282,7 +282,7 @@ if p.quick:
     for n in ss.get("research_notes", []):
         st.caption(n)
     c1, c2, c3 = st.columns(3)
-    c1.download_button("下载分享图（小红书尺寸）", share.render(p, now()), file_name=f"体检-{p.title}.png",
+    c1.download_button("下载分享图（小红书尺寸）", share.render(p, now()), file_name=f"照妖镜-{p.title}.png",
                        mime="image/png", type="primary", use_container_width=True)
     c2.download_button("下载完整报告", to_markdown(p, now()), file_name=f"验证报告-{p.title}.md",
                        mime="text/markdown", use_container_width=True)
@@ -296,7 +296,7 @@ if p.quick:
     )
 
 def N(k: int) -> int:
-    """一键体检时跳过了前两步，后面的步骤从 1 开始编号。"""
+    """照一照时跳过了前两步，后面的步骤从 1 开始编号。"""
     return k - 2 if p.quick else k
 
 
@@ -394,7 +394,7 @@ if p.criteria or p.assumptions:
     st.markdown(ui.step(N(3), "定好放弃条件", state), unsafe_allow_html=True)
     if p.quick:
         st.markdown(
-            ui.lede("体检时 AI 先替你定好了放弃线，而且是在搜资料之前就定死的，所以没法根据资料去凑。"
+            ui.lede("照的时候 AI 先替你定好了放弃线，而且是在搜资料之前就定死的，所以没法根据资料去凑。"
                     "觉得不合理可以改，但会留下记录。"),
             unsafe_allow_html=True,
         )

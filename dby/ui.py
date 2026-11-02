@@ -57,7 +57,7 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 .gets div { border-top: 2px solid var(--ink); padding-top: .5rem; font-size: .9rem; color: var(--muted); line-height: 1.6; }
 .gets b { display: block; color: var(--ink); font-size: 1rem; font-weight: 600; margin-bottom: .15rem; }
 
-/* 体检结果卡 */
+/* 结果卡 */
 .card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 1.4rem 1.6rem 1.2rem; margin: .4rem 0 1rem; }
 .card .idea { color: var(--muted); font-size: .95rem; line-height: 1.7; margin-bottom: .2rem; }
 .card .top { display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; align-items: center; margin: .2rem 0 .6rem; }
@@ -154,8 +154,8 @@ e = html.escape
 
 
 def masthead(mode: str) -> str:
-    return f"""<div class="masthead"><h1>先别做</h1>
-<p>动手写代码之前，先花一周搞清楚：到底有没有人要。</p>
+    return f"""<div class="masthead"><h1>需求照妖镜</h1>
+<p>照一照你的点子到底有没有人要。</p>
 <div class="mode">{mode}</div></div>"""
 
 
@@ -227,7 +227,7 @@ def post(channel: str, title: str, body: str, cta: str, counts: str) -> str:
 
 def hero() -> str:
     return f"""<div class="hero"><div class="hero-wrap"><div>
-<h1>先别做</h1>
+<h1>需求照妖镜</h1>
 <p class="pitch">写下你想做的产品。1 分钟后，你会知道网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。</p>
 </div><div class="hero-stamp">{stamp(Status.negative)}</div></div>
 <p class="sub">很多东西做出来没人用，是因为做之前没确认过有没有人要。问 AI 也没用，它很容易顺着你夸。这个工具反过来，专门找对你不利的证据。</p>

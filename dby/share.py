@@ -1,4 +1,4 @@
-"""生成 3:4 的分享图（适合小红书），把体检结果盖章展示。只用 Pillow，不需要联网。"""
+"""生成 3:4 的分享图（适合小红书），把照妖结果盖章展示。只用 Pillow，不需要联网。"""
 
 from __future__ import annotations
 
@@ -105,7 +105,7 @@ def render(p: Project, now: datetime) -> bytes:
     small_f = _font(_SANS, 26)
 
     # 抬头
-    d.text((M, 70), "我的点子做了一次体检", font=title_f, fill=INK)
+    d.text((M, 70), "我的点子照了照妖镜", font=title_f, fill=INK)
     d.line((M, 150, W - M, 150), fill=INK, width=3)
     d.line((M, 157, W - M, 157), fill=INK, width=1)
 
@@ -157,8 +157,8 @@ def render(p: Project, now: datetime) -> bytes:
 
     # 页脚
     d.line((M, H - 140, W - M, H - 140), fill=RULE, width=2)
-    d.text((M, H - 115), "先别做 · 不预测点子行不行，只找能推翻它的证据", font=small_f, fill=MUTED)
-    d.text((M, H - 75), "github.com/Kkk6t/dont-build-yet", font=small_f, fill=MUTED)
+    d.text((M, H - 115), "需求照妖镜 · 照一照你的点子到底有没有人要", font=small_f, fill=MUTED)
+    d.text((M, H - 75), "github.com/Kkk6t/demand-mirror", font=small_f, fill=MUTED)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)

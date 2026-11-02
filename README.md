@@ -1,18 +1,18 @@
-# 先别做 · DontBuildYet
+# 需求照妖镜 · demand-mirror
 
-**不预测你的点子行不行，只帮你拿到能推翻它的证据。**
+**照一照你的点子到底有没有人要。不预测行不行，只找能推翻它的证据。**
 
-[下载](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip) · [怎么运行](#下载和运行) · [自我验证报告](examples/dogfood-report.md)
+[下载](https://github.com/Kkk6t/demand-mirror/archive/refs/heads/main.zip) · [怎么运行](#下载和运行) · [自我验证报告](examples/dogfood-report.md)
 
-写下你想做的产品，1 分钟后你会拿到一份「体检结果」：网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。它不打分、不说"前景广阔"，只找对你不利的证据。
+写下你想做的产品，1 分钟后你会拿到一份「照妖结果」：网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。它不打分、不说"前景广阔"，只找对你不利的证据。
 
 <table>
 <tr>
-<td width="58%"><img src="docs/screenshots/02-result.png" alt="一键体检的结果"></td>
+<td width="58%"><img src="docs/screenshots/02-result.png" alt="照一照的结果"></td>
 <td><img src="docs/screenshots/06-share.png" alt="生成的分享图"></td>
 </tr>
 <tr>
-<td>一键体检：盖章结论、最该担心的事（带出处）、放弃线、明天就发的帖子</td>
+<td>照一照：盖章结论、最该担心的事（带出处）、放弃线、明天就发的帖子</td>
 <td>一键生成 3:4 分享图，可以直接发小红书</td>
 </tr>
 </table>
@@ -50,7 +50,7 @@
 
 ## 两种用法
 
-**一键体检**（首页默认）：输入点子，点「开始体检」。AI 先定好放弃线并锁定，再上网找反对意见，最后写好测试帖子。整个过程约 1 分钟，结果页可以下载分享图和完整报告。之后照着「接下来一周」发帖、回填反应即可。
+**照一照**（首页默认）：输入点子，点「照一照」。AI 先定好放弃线并锁定，再上网找反对意见，最后写好测试帖子。整个过程约 1 分钟，结果页可以下载分享图和完整报告。之后照着「接下来一周」发帖、回填反应即可。
 
 **一步步来**：先回答 AI 的 3 个追问，自己修改放弃条件后再锁定，结果更贴合你的情况。完整流程如下：
 
@@ -112,7 +112,7 @@ flowchart LR
 | 用户只用一次 | **不解决**：作品集不需要留存 |
 | 目标用户付费能力弱 | **不解决**：作品集不需要收费 |
 
-## 自我验证：用「先别做」验证「先别做」
+## 自我验证：用需求照妖镜照它自己
 
 演示模式里的案例，就是这个工具本身。完整报告见 [examples/dogfood-report.md](examples/dogfood-report.md)。
 
@@ -127,7 +127,7 @@ flowchart LR
 ### Windows
 
 1. **装 Python**（装过就跳过）：到 [python.org/downloads](https://www.python.org/downloads/) 下载 3.10 或更高版本。安装第一屏一定要勾选最下面的 **Add python.exe to PATH**。
-2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接打开。
+2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/demand-mirror/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接打开。
 3. **在项目文件夹里打开命令行**：一层层点进解压出来的文件夹，直到能看到 `app.py`。点一下窗口顶部的地址栏，把里面的路径删掉，输入 `cmd`，按回车，会弹出一个黑色窗口。
 4. **第一次用，先装组件**（只需要一次，大约 1 到 3 分钟）：
 
@@ -156,8 +156,8 @@ flowchart LR
 ### 用命令行（开发者）
 
 ```bash
-git clone https://github.com/Kkk6t/dont-build-yet.git
-cd dont-build-yet
+git clone https://github.com/Kkk6t/demand-mirror.git
+cd demand-mirror
 pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -165,7 +165,7 @@ streamlit run app.py
 ### 第一次打开之后
 
 - **不填 Key 也能看**：首页点「先看看效果（用示例）」，完整看一遍结果。
-- **分析你自己的点子**：需要一个 DeepSeek 的 API Key。到 [platform.deepseek.com](https://platform.deepseek.com/api_keys) 注册、充一点余额、创建 Key，粘贴到首页点「连接」。这一个 Key 同时管 AI 分析和联网搜索，一次体检大约几分钱。Key 会保存在本地的 `.env` 文件里，不会上传。
+- **分析你自己的点子**：需要一个 DeepSeek 的 API Key。到 [platform.deepseek.com](https://platform.deepseek.com/api_keys) 注册、充一点余额、创建 Key，粘贴到首页点「连接」。这一个 Key 同时管 AI 分析和联网搜索，照一次大约几分钱。Key 会保存在本地的 `.env` 文件里，不会上传。
 
 ### 常见问题
 

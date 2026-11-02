@@ -71,7 +71,7 @@ ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 def save_env(s: Settings, path: Path = ENV_PATH) -> None:
     """把设置写进项目文件夹的 .env，下次打开自动读取。.env 已在 .gitignore 里，不会传到 GitHub。"""
     lines = [
-        "# 先别做的本机设置。这个文件不会上传到 GitHub。",
+        "# 需求照妖镜的本机设置。这个文件不会上传到 GitHub。",
         f"LLM_BASE_URL={s.llm_base_url}",
         f"LLM_MODEL={s.llm_model}",
         f"LLM_API_KEY={s.llm_api_key}",
