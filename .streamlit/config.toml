@@ -8,6 +8,8 @@ font = "sans serif"
 
 [server]
 headless = true
+# 代码文件一改，页面自动刷新，不用重启
+runOnSave = true
 
 [browser]
 gatherUsageStats = false
