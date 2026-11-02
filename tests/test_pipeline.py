@@ -163,3 +163,16 @@ def test_deepseek_search_reuses_llm_key():
 
     _, s = build(Settings("https://api.deepseek.com", "sk-ds", "deepseek-chat", "DeepSeek", ""))
     assert isinstance(s, DeepSeekSearch) and s.api_key == "sk-ds"
+
+
+def test_quick_check_locks_before_research_and_renders_share_image():
+    from dby import share
+
+    llm, searcher = DemoLLM(DEMO_RESPONSES), DemoSearch(DEMO_SEARCH)
+    p = Project(idea=DEMO_IDEA, demo=True)
+    steps = []
+    pipeline.quick_check(p, llm, searcher, NOW, progress=steps.append)
+    assert p.quick and p.lock.locked and p.research_done and p.experiment
+    assert len(steps) == 3
+    png = share.render(p, NOW)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"

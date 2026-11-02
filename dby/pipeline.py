@@ -24,7 +24,7 @@ from .models import (
     SearchResult,
     Stance,
 )
-from .rules import RuleError
+from .rules import RuleError, lock_criteria
 from .search import SearchError, Searcher
 
 MAX_RESULTS_TO_MODEL = 30
@@ -313,3 +313,27 @@ def classify_observations(p: Project, llm: LLM, raw: str) -> list[Observation]:
 
 def criteria_json(p: Project) -> str:
     return json.dumps([c.model_dump(mode="json") for c in p.criteria], ensure_ascii=False)
+
+
+# ---------- 一键体检 ----------
+
+
+def quick_check(p: Project, llm: LLM, searcher: Searcher, now: datetime, progress=lambda msg: None) -> list[str]:
+    """一次跑完：找风险、定放弃线（在看资料之前锁定）、搜反对意见、写测试帖子。"""
+    if not p.idea.strip():
+        raise RuleError("先写下你想做什么。")
+    progress("找出这个点子最可能出错的地方，定好放弃线")
+    draft_criteria(p, llm)
+    if not p.criteria:
+        raise RuleError("AI 没能给出放弃条件，再试一次。")
+    lock_criteria(p, now)  # 在看任何资料之前锁定
+    progress("上网找反对你的人和免费的替代品")
+    try:
+        notes = run_research(p, llm, searcher)
+    except SearchError as e:
+        notes = [f"联网搜索没成功：{e}"]
+        p.research_done = True
+    progress("写好明天就能发的测试帖子")
+    plan_experiment(p, llm)
+    p.quick = True
+    return notes

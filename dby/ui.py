@@ -46,6 +46,36 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 .lede { color: var(--muted); font-size: .95rem; margin: 0 0 .8rem; max-width: 70ch; line-height: 1.7; }
 .lede b { color: var(--ink); font-weight: 500; }
 
+/* 首屏 */
+.hero { padding: 1.2rem 0 .4rem; }
+.hero h1 { font-size: 3.6rem !important; font-weight: 900; line-height: 1.05; margin: 0; padding: 0; }
+.hero .pitch { font-size: 1.25rem; color: var(--ink); margin: .9rem 0 .3rem; line-height: 1.6; max-width: 34em; }
+.hero .sub { font-size: .95rem; color: var(--muted); margin: 0 0 1.2rem; line-height: 1.7; max-width: 40em; }
+.hero-wrap { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1rem; }
+.hero-stamp .stamp { font-size: 1.9rem; }
+.gets { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.6rem 0 .4rem; }
+.gets div { border-top: 2px solid var(--ink); padding-top: .5rem; font-size: .9rem; color: var(--muted); line-height: 1.6; }
+.gets b { display: block; color: var(--ink); font-size: 1rem; font-weight: 600; margin-bottom: .15rem; }
+
+/* 体检结果卡 */
+.card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 1.4rem 1.6rem 1.2rem; margin: .4rem 0 1rem; }
+.card .idea { color: var(--muted); font-size: .95rem; line-height: 1.7; margin-bottom: .2rem; }
+.card .top { display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; align-items: center; margin: .2rem 0 .6rem; }
+.card .verdict { font-size: 1.12rem; font-weight: 500; line-height: 1.7; }
+.card h4 { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif !important;
+           font-size: 1.15rem; font-weight: 700; margin: 1.3rem 0 .5rem; padding: 0; color: var(--ink); }
+.card ul.worry { list-style: none; margin: 0; padding: 0; }
+.card ul.worry li { padding: .45rem 0 .45rem 1.3rem; position: relative; border-bottom: 1px solid var(--rule-soft); line-height: 1.7; }
+.card ul.worry li:before { content: ""; position: absolute; left: 0; top: .95rem; width: .55rem; height: .55rem; background: var(--red); }
+.card ul.worry a { font-size: .8rem; color: var(--muted); margin-left: .4rem; }
+.card .line { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-size: 1.05rem; padding: .25rem 0; }
+.card .post { margin: .2rem 0 0; }
+@media (max-width: 640px) {
+  .hero h1 { font-size: 2.6rem !important; }
+  .hero-wrap, .card .top { grid-template-columns: 1fr; }
+  .gets { grid-template-columns: 1fr; }
+}
+
 /* 使用说明 */
 .howto { background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: .9rem 1.1rem; margin: 0 0 1rem; font-size: .93rem; line-height: 1.8; }
 .howto ol { margin: .3rem 0 0 1.2rem; padding: 0; }
@@ -110,6 +140,7 @@ table.ledger { width: 100%; border-collapse: collapse; font-size: .9rem; margin:
 
 .stButton button[kind="primary"] { background: var(--ink); border-color: var(--ink); }
 .stButton button[kind="primary"]:hover { background: #2C3D60; border-color: #2C3D60; }
+.stButton button[kind="primary"]:disabled { background: #C9D2DE; border-color: #C9D2DE; color: #fff; }
 .stButton button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 @media (max-width: 640px) {
   .masthead h1 { font-size: 2.3rem; }
@@ -192,3 +223,45 @@ def post(channel: str, title: str, body: str, cta: str, counts: str) -> str:
         f'<div class="post"><div class="ch">{e(channel)}</div>{t}<div class="b">{e(body.strip()).replace(chr(10), "<br>")}</div>'
         f'<div class="cta">{e(cta)}</div><div class="meta" style="margin-top:.4rem">有人照做了，就记到「{e(counts)}」</div></div>'
     )
+
+
+def hero() -> str:
+    return f"""<div class="hero"><div class="hero-wrap"><div>
+<h1>先别做</h1>
+<p class="pitch">写下你想做的产品。1 分钟后，你会知道网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。</p>
+</div><div class="hero-stamp">{stamp(Status.negative)}</div></div>
+<p class="sub">很多东西做出来没人用，是因为做之前没确认过有没有人要。问 AI 也没用，它很容易顺着你夸。这个工具反过来，专门找对你不利的证据。</p>
+</div>"""
+
+
+def gets() -> str:
+    return """<div class="gets">
+<div><b>反对你的证据</b>网上已有的免费替代品、类似产品的下场，每条都附原文链接</div>
+<div><b>你的放弃线</b>比如「7 天内私信不到 5 个就放弃」，在看资料之前就定死</div>
+<div><b>明天就能发的帖子</b>每条都让读者做一件能数出来的事，一周后用数字说话</div>
+</div>"""
+
+
+def result_card(p, v, meaning: str) -> str:
+    worries = [x for x in p.evidence if x.stance == Stance.against][:3]
+    if worries:
+        items = "".join(
+            f'<li>{e(x.claim)}<a href="{e(x.url)}" target="_blank" rel="noopener">出处</a></li>' for x in worries
+        )
+        worry_title = "最该担心的事（网上找到的）"
+    else:
+        items = "".join(f"<li>{e(a.statement)}</li>" for a in p.assumptions[:3])
+        worry_title = "最该担心的事（AI 推测的，还没找到网上证据）"
+    lines = "".join(f'<div class="line">{e(c.sentence())}。</div>' for c in p.criteria)
+    first = p.experiment.posts[0] if p.experiment and p.experiment.posts else None
+    post_html = ""
+    if first:
+        c = p.criterion(first.criterion_id)
+        post_html = "<h4>明天就发这条</h4>" + post(first.channel, first.title, first.body, first.cta, c.metric if c else "—")
+    return f"""<div class="card">
+<div class="idea">「{e(p.idea.strip())}」</div>
+<div class="top">{stamp(v.status, big=True, anim=True)}<div class="verdict">{e(meaning)}</div></div>
+<h4>{worry_title}</h4><ul class="worry">{items}</ul>
+<h4>你的放弃线</h4>{lines}
+{post_html}
+</div>"""

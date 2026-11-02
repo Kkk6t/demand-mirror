@@ -9,7 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-from dby import pipeline, storage, ui
+from dby import pipeline, share, storage, ui
 from dby.config import PRESETS, Settings, build, build_demo, save_env
 from dby.demo import DEMO_ANSWERS, DEMO_IDEA, DEMO_RAW_COMMENTS
 from dby.llm import LLMError
@@ -45,7 +45,7 @@ ss = st.session_state
 if "settings" not in ss:
     ss.settings = Settings.from_env()
 if "project" not in ss:
-    ss.project = Project(idea=DEMO_IDEA, demo=True) if ss.settings.demo else Project()
+    ss.project = Project()
 if "offset" not in ss:
     ss.offset = 0  # 示例里"假装过了几天"
 
@@ -81,7 +81,7 @@ def run(fn, *args, spinner: str = "处理中…"):
 def new_project(demo: bool) -> None:
     ss.project = Project(idea=DEMO_IDEA, demo=True) if demo else Project()
     ss.offset = 0
-    for k in [k for k in ss.keys() if str(k).startswith(("chg_", "comments", "research_notes"))]:
+    for k in [k for k in ss.keys() if str(k).startswith(("chg_", "comments", "research_notes", "manual", "hero_idea"))]:
         del ss[k]
 
 
@@ -94,22 +94,22 @@ def locked_note(text: str) -> None:
 verdict = evaluate(p, now())
 
 with st.sidebar:
-    st.markdown('<div class="serif" style="font-size:1.15rem;font-weight:600">现在的结论</div>', unsafe_allow_html=True)
-    st.markdown(ui.stamp(verdict.status), unsafe_allow_html=True)
-    st.markdown(f'<div class="meaning">{ui.e(STATUS_MEANING[verdict.status])}</div>', unsafe_allow_html=True)
+    if p.quick or p.questions or p.lock.locked:
+        st.markdown('<div class="serif" style="font-size:1.15rem;font-weight:600">现在的结论</div>', unsafe_allow_html=True)
+        st.markdown(ui.stamp(verdict.status), unsafe_allow_html=True)
+        st.markdown(f'<div class="meaning">{ui.e(STATUS_MEANING[verdict.status])}</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="serif" style="font-weight:600;margin-top:1.2rem">手里最硬的证据</div>', unsafe_allow_html=True)
-    st.markdown('<div class="meta">从下往上越来越可信，深色是已经拿到的</div>', unsafe_allow_html=True)
-    st.markdown(ui.ladder(verdict.highest_level), unsafe_allow_html=True)
-    if p.guard_hits:
-        st.markdown(
-            f'<div class="guard">AI 的回答里有 <b>{len(p.guard_hits)}</b> 处没有证据的空话被拦下：'
-            + "、".join(sorted({h.phrase for h in p.guard_hits})[:6])
-            + "</div>",
-            unsafe_allow_html=True,
-        )
-
-    st.divider()
+        st.markdown('<div class="serif" style="font-weight:600;margin-top:1.2rem">手里最硬的证据</div>', unsafe_allow_html=True)
+        st.markdown('<div class="meta">从下往上越来越可信，深色是已经拿到的</div>', unsafe_allow_html=True)
+        st.markdown(ui.ladder(verdict.highest_level), unsafe_allow_html=True)
+        if p.guard_hits:
+            st.markdown(
+                f'<div class="guard">AI 的回答里有 <b>{len(p.guard_hits)}</b> 处没有证据的空话被拦下：'
+                + "、".join(sorted({h.phrase for h in p.guard_hits})[:6])
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+        st.divider()
     st.markdown('<div class="serif" style="font-weight:600">我的点子</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     if c1.button("写新点子", use_container_width=True):
@@ -117,6 +117,7 @@ with st.sidebar:
         st.rerun()
     if c2.button("看示例", use_container_width=True):
         new_project(demo=True)
+        pipeline.quick_check(ss.project, *build_demo(), datetime.now())
         st.rerun()
 
     saved = [x for x in storage.list_projects() if x.id != p.id and x.idea.strip() and not x.demo]
@@ -175,47 +176,16 @@ with st.sidebar:
 
 # ---------------- 页面顶部 ----------------
 
-if needs_key or p.demo:
-    mode = ""
-else:
-    mode = f"已连接 <b>{ui.e(llm.name)}</b>　·　联网搜索：<b>{ui.e(searcher.name)}</b>"
-st.markdown(ui.masthead(mode), unsafe_allow_html=True)
 
-with st.expander("第一次用？先看这里", expanded=not p.questions):
+def connect_box() -> None:
     st.markdown(
-        """<div class="howto">很多东西做出来没人用，是因为做之前没确认过有没有人要。问 AI 也没用，它很容易顺着你夸。
-这个工具反过来：<b>不判断你的点子好不好，只帮你找到真实的证据</b>，包括对你不利的。<br>
-跟着下面 6 步走，每步只做一件事：
-<ol>
-<li>写下你想做什么</li>
-<li>回答 AI 的 3 个问题，把想法说具体</li>
-<li>定好「出现什么结果我就放弃」</li>
-<li>让 AI 上网找反对意见</li>
-<li>照着 AI 写好的帖子发出去，测试一周</li>
-<li>把收到的真实反应填回来，得出结论</li>
-</ol></div>""",
-        unsafe_allow_html=True,
-    )
-
-if p.demo:
-    st.markdown(
-        '<div class="notice">你正在看<b>示例</b>：作者用这个工具检验它自己。示例内容是固定的，<b>不能修改</b>，'
-        "一路点按钮就能看完整个流程。想分析你自己的点子，点下面的按钮。</div>",
-        unsafe_allow_html=True,
-    )
-    if st.button("写我自己的点子", type="primary"):
-        new_project(demo=False)
-        st.rerun()
-elif needs_key:
-    st.markdown(
-        '<div class="notice"><b>先连接 AI</b>。这个工具要用 AI 来提问、搜资料、写帖子，需要一个 API Key。'
-        '最简单的是 DeepSeek：到 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a> '
-        "注册，充一点余额，点「创建 API Key」，把以 sk- 开头的那串字符复制到下面。</div>",
+        '<div class="notice"><b>先连接 AI</b>。这个工具要用 AI 来分析、搜资料、写帖子，需要一个 DeepSeek 的 API Key：'
+        '到 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a> '
+        "注册，充一点余额，点「创建 API Key」，把以 sk- 开头的那串字符复制到下面。一次体检的费用大约几分钱。</div>",
         unsafe_allow_html=True,
     )
     k1, k2 = st.columns([4, 1], vertical_alignment="bottom")
     new_key = k1.text_input("DeepSeek API Key", type="password", placeholder="sk-…")
-    st.caption("这一个 Key 同时管提问和联网搜索，不用再申请别的。")
     if k2.button("连接", type="primary", use_container_width=True):
         if not new_key.strip():
             st.warning("先把 Key 粘贴进去。")
@@ -225,30 +195,136 @@ elif needs_key:
             save_env(ss.settings)
             st.rerun()
 
+
+def run_quick(target: Project, use_llm, use_searcher) -> None:
+    try:
+        with st.status("正在体检，大约需要 1 分钟…", expanded=True) as box:
+            notes = pipeline.quick_check(target, use_llm, use_searcher, now(), progress=box.write)
+            box.update(label="体检完成", state="complete", expanded=False)
+    except RuleError as err:
+        st.warning(str(err))
+        return
+    except LLMError as err:
+        st.error(f"AI 调用失败：{err}\n\n检查 DeepSeek 的 API Key 是否填对、账户里有没有余额，或者稍后再试。")
+        return
+    ss.research_notes = notes
+    storage.save(target)
+    st.rerun()
+
+
+EXAMPLES = [
+    "帮大学生把上课录音整理成复习提纲的小程序",
+    "给宠物店老板用的会员积分小工具",
+    "卖 9.9 元的考研英语作文模板合集",
+]
+
+started = p.quick or bool(p.questions) or p.lock.locked or ss.get("manual", False)
+
+if not started:
+    st.markdown(ui.hero(), unsafe_allow_html=True)
+    if "hero_idea" not in ss:
+        ss.hero_idea = ""
+    idea_in = st.text_area(
+        "你想做什么",
+        key="hero_idea",
+        height=110,
+        label_visibility="collapsed",
+        placeholder="一两句话就够：做一个什么东西，给谁用。\n例如：帮大学生把上课录音整理成复习提纲的小程序",
+    )
+    st.markdown('<div class="meta">没想好？点一个例子试试：</div>', unsafe_allow_html=True)
+    ex_cols = st.columns(len(EXAMPLES))
+    for col, ex in zip(ex_cols, EXAMPLES):
+        col.button(ex, key=f"ex_{ex}", use_container_width=True,
+                   on_click=lambda ex=ex: ss.update(hero_idea=ex))
+    if needs_key:
+        connect_box()
+    b1, b2 = st.columns(2)
+    go = b1.button("开始体检", type="primary", use_container_width=True)
+    peek = b2.button("先看看效果（用示例）", use_container_width=True)
+    if go:
+        if needs_key:
+            st.warning("先在上面填好 DeepSeek 的 API Key 并点「连接」。没有 Key 的话，可以先点「先看看效果」。")
+        elif not idea_in.strip():
+            st.warning("先写下你想做什么，或者点上面的一个例子。")
+        else:
+            p.idea = idea_in.strip()
+            run_quick(p, llm, searcher)
+    if peek:
+        new_project(demo=True)
+        run_quick(ss.project, *build_demo())
+    st.markdown(ui.gets(), unsafe_allow_html=True)
+    if st.button("我想一步步来：先回答 AI 的 3 个问题，结果更准", type="tertiary", disabled=needs_key):
+        p.idea = idea_in.strip()
+        ss.manual = True
+        st.rerun()
+    st.stop()
+
+# ---------------- 已经开始 ----------------
+
+if p.demo:
+    mode = "你正在看<b>示例</b>：作者用这个工具检验它自己。"
+elif needs_key:
+    mode = ""
+else:
+    mode = f"已连接 <b>{ui.e(llm.name)}</b>　·　联网搜索：<b>{ui.e(searcher.name)}</b>"
+st.markdown(ui.masthead(mode), unsafe_allow_html=True)
+
+if p.demo:
+    if st.button("测我自己的点子", type="primary"):
+        new_project(demo=False)
+        st.rerun()
+elif needs_key:
+    connect_box()
+
+if p.quick:
+    v = evaluate(p, now())
+    st.markdown(ui.result_card(p, v, STATUS_MEANING[v.status]), unsafe_allow_html=True)
+    for n in ss.get("research_notes", []):
+        st.caption(n)
+    c1, c2, c3 = st.columns(3)
+    c1.download_button("下载分享图（小红书尺寸）", share.render(p, now()), file_name=f"体检-{p.title}.png",
+                       mime="image/png", type="primary", use_container_width=True)
+    c2.download_button("下载完整报告", to_markdown(p, now()), file_name=f"验证报告-{p.title}.md",
+                       mime="text/markdown", use_container_width=True)
+    if c3.button("换个点子再测", use_container_width=True):
+        new_project(demo=False)
+        st.rerun()
+    st.markdown(
+        '<div class="step"><span class="n">→</span><h3>接下来一周，照着做</h3><span class="s"></span></div>'
+        + ui.lede("上面只是网上的资料，证明不了有人会给你付钱。真正的答案要靠你把帖子发出去，一周后看数字。下面是详细的放弃条件、全部资料和一周安排。"),
+        unsafe_allow_html=True,
+    )
+
+def N(k: int) -> int:
+    """一键体检时跳过了前两步，后面的步骤从 1 开始编号。"""
+    return k - 2 if p.quick else k
+
+
 # ---------------- 第 1 步 ----------------
 
-st.markdown(ui.step(1, "你想做什么", "已完成" if p.questions else ""), unsafe_allow_html=True)
-st.markdown(ui.lede("用一两句话说清楚：做一个什么东西，给谁用。不用写得很完整，后面 AI 会追问。"), unsafe_allow_html=True)
-idea = st.text_area(
-    "你的点子",
-    value=p.idea,
-    height=100,
-    label_visibility="collapsed",
-    placeholder="例如：做一个小程序，帮大学生把上课录音整理成复习提纲",
-    disabled=p.demo or p.lock.locked,
-)
-if p.demo:
-    locked_note("示例内容不能修改。")
-elif p.lock.locked:
-    locked_note("放弃条件已经定了，点子不能再改。想换个点子，点左边的「写新点子」。")
-else:
-    p.idea = idea
-if st.button("下一步：让 AI 问我几个问题", type="primary" if not p.questions else "secondary", disabled=p.lock.locked):
-    _, ok = run(pipeline.ask_questions, p, llm, spinner="AI 正在想该问你什么…")
-    if ok:
-        if p.demo:
-            p.answers = {q.id: a for q, a in zip(p.questions, DEMO_ANSWERS)}
-        st.rerun()
+if not p.quick:
+    st.markdown(ui.step(1, "你想做什么", "已完成" if p.questions else ""), unsafe_allow_html=True)
+    st.markdown(ui.lede("用一两句话说清楚：做一个什么东西，给谁用。不用写得很完整，后面 AI 会追问。"), unsafe_allow_html=True)
+    idea = st.text_area(
+        "你的点子",
+        value=p.idea,
+        height=100,
+        label_visibility="collapsed",
+        placeholder="例如：做一个小程序，帮大学生把上课录音整理成复习提纲",
+        disabled=p.demo or p.lock.locked,
+    )
+    if p.demo:
+        locked_note("示例内容不能修改。")
+    elif p.lock.locked:
+        locked_note("放弃条件已经定了，点子不能再改。想换个点子，点左边的「写新点子」。")
+    else:
+        p.idea = idea
+    if st.button("下一步：让 AI 问我几个问题", type="primary" if not p.questions else "secondary", disabled=p.lock.locked):
+        _, ok = run(pipeline.ask_questions, p, llm, spinner="AI 正在想该问你什么…")
+        if ok:
+            if p.demo:
+                p.answers = {q.id: a for q, a in zip(p.questions, DEMO_ANSWERS)}
+            st.rerun()
 
 # ---------------- 第 2 步 ----------------
 
@@ -274,7 +350,7 @@ if p.questions:
         _, ok = run(pipeline.draft_criteria, p, llm, spinner="AI 正在找这个点子最可能出错的地方…")
         if ok:
             st.rerun()
-else:
+elif not p.quick:
     st.markdown(ui.step(2, "回答 3 个问题", todo=True), unsafe_allow_html=True)
 
 
@@ -315,12 +391,19 @@ def criteria_form(prefix: str, items: list[Criterion], editable: bool) -> None:
 
 if p.criteria or p.assumptions:
     state = f"已定好 · {p.lock.locked_at:%m-%d %H:%M}" if p.lock.locked else "还没定"
-    st.markdown(ui.step(3, "定好放弃条件", state), unsafe_allow_html=True)
-    st.markdown(
-        ui.lede("这一步最重要。在看任何资料之前，先写下「几天内，如果某个数字不到多少，我就放弃」。"
-                "这样一周后你没法骗自己。AI 已经起草了几条，你可以直接改。"),
-        unsafe_allow_html=True,
-    )
+    st.markdown(ui.step(N(3), "定好放弃条件", state), unsafe_allow_html=True)
+    if p.quick:
+        st.markdown(
+            ui.lede("体检时 AI 先替你定好了放弃线，而且是在搜资料之前就定死的，所以没法根据资料去凑。"
+                    "觉得不合理可以改，但会留下记录。"),
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            ui.lede("这一步最重要。在看任何资料之前，先写下「几天内，如果某个数字不到多少，我就放弃」。"
+                    "这样一周后你没法骗自己。AI 已经起草了几条，你可以直接改。"),
+            unsafe_allow_html=True,
+        )
 
     if p.assumptions:
         with st.expander(f"AI 觉得这个点子最可能出错的 {len(p.assumptions)} 个地方", expanded=not p.lock.locked):
@@ -363,12 +446,12 @@ if p.criteria or p.assumptions:
                     del ss[buf_key]
                     st.rerun()
 else:
-    st.markdown(ui.step(3, "定好放弃条件", todo=True), unsafe_allow_html=True)
+    st.markdown(ui.step(N(3), "定好放弃条件", todo=True), unsafe_allow_html=True)
 
 # ---------------- 第 4 步 ----------------
 
 if p.lock.locked:
-    st.markdown(ui.step(4, "先看网上的反对意见", f"找到 {len(p.evidence)} 条" if p.research_done else ""), unsafe_allow_html=True)
+    st.markdown(ui.step(N(4), "先看网上的反对意见", f"找到 {len(p.evidence)} 条" if p.research_done else ""), unsafe_allow_html=True)
     st.markdown(
         ui.lede("AI 会上网搜，而且一半以上专门搜反对意见：有没有免费的替代品、类似的东西是不是没人用。"
                 "网上的资料只能说明市场情况，证明不了有人会给你付钱，所以这一步结束后结论最多是「还不知道」或「先别做」。"),
@@ -403,14 +486,14 @@ if p.lock.locked:
             for q in p.queries:
                 st.markdown(f"- 找{q.kind}意见：{q.query}")
 else:
-    st.markdown(ui.step(4, "先看网上的反对意见", todo=True), unsafe_allow_html=True)
+    st.markdown(ui.step(N(4), "先看网上的反对意见", todo=True), unsafe_allow_html=True)
 
 # ---------------- 第 5 步 ----------------
 
 if p.research_done:
     ex = p.experiment
     state = f"{ex.started_at:%m月%d日}开始" if ex and ex.started_at else ""
-    st.markdown(ui.step(5, "发帖测试一周", state), unsafe_allow_html=True)
+    st.markdown(ui.step(N(5), "发帖测试一周", state), unsafe_allow_html=True)
     st.markdown(
         ui.lede("AI 帮你安排好 7 天里每天做什么，并写好要发的帖子。每条帖子都会让看的人做一件能数出来的事，"
                 "比如私信你、付定金。一周后你手里就有真实的数字，不用再猜。"),
@@ -445,13 +528,13 @@ if p.research_done:
                 if ok:
                     st.rerun()
 else:
-    st.markdown(ui.step(5, "发帖测试一周", todo=True), unsafe_allow_html=True)
+    st.markdown(ui.step(N(5), "发帖测试一周", todo=True), unsafe_allow_html=True)
 
 # ---------------- 第 6 步 ----------------
 
 if p.experiment and p.experiment.started_at:
     day = (now() - p.experiment.started_at).days + 1
-    st.markdown(ui.step(6, "把真实反应填回来", f"今天是第 {day} 天"), unsafe_allow_html=True)
+    st.markdown(ui.step(N(6), "把真实反应填回来", f"今天是第 {day} 天"), unsafe_allow_html=True)
     st.markdown(
         ui.lede("这一周里随时可以回来填。把收到的评论、私信、聊天记录复制进来，AI 会把每一条分成"
                 "「付了钱」「留了联系方式」「只是说说」「不需要」。不想用 AI 分，也可以直接填数字。"),
@@ -484,12 +567,12 @@ if p.experiment and p.experiment.started_at:
             else:
                 p.manual_counts[c.id] = int(val)
 else:
-    st.markdown(ui.step(6, "把真实反应填回来", todo=True), unsafe_allow_html=True)
+    st.markdown(ui.step(N(6), "把真实反应填回来", todo=True), unsafe_allow_html=True)
 
 # ---------------- 结论 ----------------
 
 verdict = evaluate(p, now())
-if p.lock.locked:
+if p.lock.locked and (not p.quick or (p.experiment and p.experiment.started_at)):
     st.markdown('<div class="step"><span class="n">=</span><h3>结论</h3><span class="s">按你定的条件算出来，不是 AI 说的</span></div>', unsafe_allow_html=True)
     left, right = st.columns([2, 3], vertical_alignment="center")
     with left:

@@ -2,9 +2,18 @@
 
 **不预测你的点子行不行，只帮你拿到能推翻它的证据。**
 
-一个给"想做产品、但不知道有没有人要"的人用的验证工具。它不打分、不说"前景广阔"，而是让你先写下放弃条件，再去找反对证据，最后用一周的真实实验拿数据说话。
+写下你想做的产品，1 分钟后你会拿到一份「体检结果」：网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。它不打分、不说"前景广阔"，只找对你不利的证据。
 
-![总览](docs/screenshots/01-overview.png)
+<table>
+<tr>
+<td width="58%"><img src="docs/screenshots/02-result.png" alt="一键体检的结果"></td>
+<td><img src="docs/screenshots/06-share.png" alt="生成的分享图"></td>
+</tr>
+<tr>
+<td>一键体检：盖章结论、最该担心的事（带出处）、放弃线、明天就发的帖子</td>
+<td>一键生成 3:4 分享图，可以直接发小红书</td>
+</tr>
+</table>
 
 ---
 
@@ -37,7 +46,11 @@
 - **先别做**：到期没达到你自己定的放弃条件，或者网上有足够多有分量的反对意见
 - **有人愿意付钱**：你定的「有人付钱」条件全部达成
 
-## 流程
+## 两种用法
+
+**一键体检**（首页默认）：输入点子，点「开始体检」。AI 先定好放弃线并锁定，再上网找反对意见，最后写好测试帖子。整个过程约 1 分钟，结果页可以下载分享图和完整报告。之后照着「接下来一周」发帖、回填反应即可。
+
+**一步步来**：先回答 AI 的 3 个追问，自己修改放弃条件后再锁定，结果更贴合你的情况。完整流程如下：
 
 ```mermaid
 flowchart LR
@@ -61,11 +74,11 @@ flowchart LR
 
 <table>
 <tr>
-<td><img src="docs/screenshots/02-criteria.png" alt="放弃条件"></td>
 <td><img src="docs/screenshots/03-ledger.png" alt="网上的反对意见"></td>
+<td><img src="docs/screenshots/04-posts.png" alt="可计数的宣传"></td>
 </tr>
 <tr>
-<td><img src="docs/screenshots/04-posts.png" alt="可计数的宣传"></td>
+<td><img src="docs/screenshots/01-overview.png" alt="首页"></td>
 <td><img src="docs/screenshots/05-verdict.png" alt="判定"></td>
 </tr>
 </table>
@@ -147,6 +160,7 @@ dby/
   llm.py            OpenAI 兼容接口 + 演示模式
   search.py         DeepSeek 官方搜索、博查、Tavily
   report.py         导出 Markdown 报告
+  share.py          生成分享图（Pillow，不需要联网）
   storage.py        项目存档
   demo.py           自我验证案例的演示数据
   ui.py             样式和 HTML 片段
