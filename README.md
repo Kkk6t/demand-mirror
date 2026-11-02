@@ -2,6 +2,8 @@
 
 **不预测你的点子行不行，只帮你拿到能推翻它的证据。**
 
+[下载](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip) · [怎么运行](#下载和运行) · [自我验证报告](examples/dogfood-report.md)
+
 写下你想做的产品，1 分钟后你会拿到一份「体检结果」：网上有谁在反对你、你该在什么情况下放弃、明天该发什么帖子去测试。它不打分、不说"前景广阔"，只找对你不利的证据。
 
 <table>
@@ -120,9 +122,21 @@ flowchart LR
 
 > 演示里的"示例评论"是虚构的，只用来展示归类和判定流程。
 
-## 快速开始
+## 下载和运行
 
-需要 Python 3.10 以上。
+### Windows：双击就能用
+
+1. **装 Python**（装过就跳过）：到 [python.org/downloads](https://www.python.org/downloads/) 下载 3.10 或更高版本。安装第一屏一定要勾选最下面的 **Add python.exe to PATH**。
+2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接双击。
+3. **双击 `run-windows.bat`**。第一次会自动准备环境、安装组件，大约 1 到 3 分钟；以后再双击几秒就打开。浏览器会自动打开页面。
+
+用完关掉那个黑色窗口就行。
+
+### macOS / Linux
+
+下载并解压后，在文件夹里运行 `./run-mac.command`（macOS 也可以直接双击它；第一次可能要先 `chmod +x run-mac.command`）。
+
+### 用命令行（开发者）
 
 ```bash
 git clone https://github.com/Kkk6t/dont-build-yet.git
@@ -131,17 +145,32 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-不填任何 Key 就是**演示模式**，可以完整走一遍流程。
+### 第一次打开之后
 
-要分析你自己的点子，在侧边栏"模型和搜索设置"里填，或者复制 `.env.example` 为 `.env`：
+- **不填 Key 也能看**：首页点「先看看效果（用示例）」，完整看一遍结果。
+- **分析你自己的点子**：需要一个 DeepSeek 的 API Key。到 [platform.deepseek.com](https://platform.deepseek.com/api_keys) 注册、充一点余额、创建 Key，粘贴到首页点「连接」。这一个 Key 同时管 AI 分析和联网搜索，一次体检大约几分钱。Key 会保存在本地的 `.env` 文件里，不会上传。
+
+### 常见问题
+
+| 现象 | 怎么办 |
+|---|---|
+| 双击 `run-windows.bat` 提示没有找到 Python | 安装 Python 时没勾选 Add to PATH。重新运行安装程序，选 Modify，勾上它 |
+| 浏览器打开后一片空白 | 浏览器或翻译插件在自动翻译页面。对 `localhost` 关掉翻译，或者用无痕窗口打开 |
+| 提示「DeepSeek 不认这个 Key」 | Key 没复制完整，重新复制一次 |
+| 提示余额不足 | 到 DeepSeek 平台充值 |
+| 想换别家的模型 | 左边「AI 和搜索设置」里可以选通义千问、Kimi、OpenAI 或自定义接口 |
+
+### 高级配置
+
+也可以把配置写进 `.env`（复制 `.env.example` 改名即可）：
 
 | 配置 | 说明 |
 |---|---|
 | `LLM_API_KEY` | 任何 OpenAI 兼容接口都行。默认 DeepSeek，侧边栏也预设了通义千问、Kimi、OpenAI |
 | `SEARCH_PROVIDER` | 默认 `DeepSeek`：用 [DeepSeek 官方搜索接口](https://api-docs.deepseek.com/guides/search/)，和对话共用一个 Key。也可以选 `博查`（[open.bochaai.com](https://open.bochaai.com)）或 `Tavily`（[tavily.com](https://tavily.com)） |
-| `SEARCH_API_KEY` | 只有选博查或 Tavily 时才需要。不接搜索也能用，只是第 4 步会搜不到资料 |
+| `SEARCH_API_KEY` | 只有选博查或 Tavily 时才需要 |
 
-项目会自动存档到 `data/projects/`，实验跑到第几天回来打开就行。也可以在侧边栏「备份 / 恢复」里下载和上传备份文件。
+项目会自动存档到 `data/projects/`，测试跑到第几天回来打开就行。也可以在侧边栏「备份 / 恢复」里下载和上传备份文件。
 
 ### 部署到网上
 
@@ -150,6 +179,8 @@ streamlit run app.py
 ## 项目结构
 
 ```
+run-windows.bat     Windows 一键启动
+run-mac.command     macOS / Linux 一键启动
 app.py              Streamlit 界面
 dby/
   models.py         数据模型、证据等级、三种状态
