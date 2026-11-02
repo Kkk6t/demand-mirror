@@ -19,7 +19,7 @@ def make_project() -> Project:
 
 def test_lock_requires_a_payment_criterion():
     p = Project(idea="x", criteria=[Criterion(metric="私信", level=Level.L3, threshold=3, days=7)])
-    with pytest.raises(RuleError, match="付费"):
+    with pytest.raises(RuleError, match="付钱"):
         lock_criteria(p, NOW)
 
 

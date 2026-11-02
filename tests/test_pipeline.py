@@ -55,10 +55,10 @@ def test_demo_flow_end_to_end():
     # 第 8 天，私信只有 2 个（标准是 5）：淘汰条件触发
     v = evaluate(p, NOW + timedelta(days=8))
     assert v.status == Status.negative
-    assert any("到期" in r for r in v.reasons)
+    assert any("天到了" in r for r in v.reasons)
 
     md = to_markdown(p, NOW)
-    assert "证据台账" in md and "出现反向信号" in md
+    assert "网上找到的资料" in md and "先别做" in md
 
 
 def test_research_requires_locked_criteria():

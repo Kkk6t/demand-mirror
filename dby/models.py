@@ -29,19 +29,19 @@ class Level(IntEnum):
 
 
 LEVEL_NAMES = {
-    Level.L0: "推测",
-    Level.L1: "言论",
-    Level.L2: "行为",
-    Level.L3: "承诺",
-    Level.L4: "付费",
+    Level.L0: "猜的",
+    Level.L1: "嘴上说",
+    Level.L2: "在花钱花时间",
+    Level.L3: "留了联系方式",
+    Level.L4: "付了钱",
 }
 
 LEVEL_HINTS = {
-    Level.L0: "没有来源的判断，包括 AI 说的",
-    Level.L1: "有人说想要、在讨论",
-    Level.L2: "有人正为这个问题花钱或花时间",
-    Level.L3: "有人对你留联系方式、预约",
-    Level.L4: "有人对你付钱或付定金",
+    Level.L0: "AI 或你自己的判断，没有出处",
+    Level.L1: "有人说想要，但没有任何行动",
+    Level.L2: "有人已经在为这个问题买别的产品、自己凑合解决",
+    Level.L3: "有人主动私信你、加你微信、预约",
+    Level.L4: "有人真的给你付了钱或定金",
 }
 
 # 案头调研（联网搜索）能达到的最高等级。由代码强制，不由模型决定。
@@ -57,9 +57,16 @@ class Stance(str, Enum):
 class Status(str, Enum):
     """结果只有三种。没有分数，没有"建议做"。"""
 
-    unverified = "未验证"
-    negative = "出现反向信号"
-    paid = "出现付费信号"
+    unverified = "还不知道"
+    negative = "先别做"
+    paid = "有人愿意付钱"
+
+
+STATUS_MEANING = {
+    Status.unverified: "证据还不够，说明不了任何事。继续往下走。",
+    Status.negative: "你自己定的放弃条件被触发了，或者网上的反对意见很多。先别急着写代码。",
+    Status.paid: "有人真的给你付钱了。可以开始做一个最小的版本。",
+}
 
 
 class Question(BaseModel):
@@ -86,7 +93,7 @@ class Criterion(BaseModel):
     note: str = ""
 
     def sentence(self) -> str:
-        return f"{self.days} 天内「{self.metric}」少于 {self.threshold}，就放弃"
+        return f"{self.days} 天内，如果「{self.metric}」不到 {self.threshold} 个，就放弃"
 
 
 class CriteriaChange(BaseModel):
@@ -202,3 +209,12 @@ class Project(BaseModel):
     def title(self) -> str:
         text = self.idea.strip().splitlines()[0] if self.idea.strip() else "未命名点子"
         return text[:24] + ("…" if len(text) > 24 else "")
+
+
+# 归类标签在界面上的叫法
+OBS_LABELS = {
+    "付费": "付了钱",
+    "承诺": "留了联系方式",
+    "言论": "只是说说",
+    "否定": "不需要",
+}

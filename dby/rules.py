@@ -44,17 +44,17 @@ def fingerprint(criteria: list[Criterion]) -> str:
 
 def validate_criteria(criteria: list[Criterion]) -> None:
     if not criteria:
-        raise RuleError("至少写一条淘汰标准。")
+        raise RuleError("至少写一条放弃条件。")
     if not any(c.level == Level.L4 for c in criteria):
-        raise RuleError("至少要有一条「付费」级别的标准。没有付费标准的验证，只能证明有人感兴趣。")
+        raise RuleError("至少要有一条「有人付钱」的条件。只看私信和留言，最多说明有人感兴趣，说明不了有人会买。")
     for c in criteria:
         if c.level < Level.L3:
             raise RuleError(
-                f"「{c.metric}」是{LEVEL_NAMES[c.level]}级别。淘汰标准只能用承诺（L3）或付费（L4），"
-                "因为点赞和评论说'好想要'都不花成本。"
+                f"「{c.metric}」属于「{LEVEL_NAMES[c.level]}」。放弃条件只能数「留了联系方式」或「付了钱」的人，"
+                "因为点赞和评论「好想要」不花任何成本。"
             )
         if not c.metric.strip():
-            raise RuleError("有一条标准没写指标名称。")
+            raise RuleError("有一条条件没写要数什么。")
 
 
 def lock_criteria(project: Project, now: datetime) -> None:
@@ -84,7 +84,7 @@ def change_criteria(
         project.criteria = new
         return None
     if not reason.strip():
-        raise RuleError("锁定后修改标准必须写理由，理由会写进报告。")
+        raise RuleError("条件定好之后再改，必须写清楚为什么改，理由会写进报告。")
     validate_criteria(new)
     change = CriteriaChange(
         at=now,
@@ -108,7 +108,7 @@ class CriterionResult:
     count: int
     met: bool
     expired: bool
-    source: str  # "手动填写" / "评论归类"
+    source: str  # "自己填的" / "AI 归类"
 
 
 @dataclass
@@ -123,13 +123,13 @@ class Verdict:
 def count_for(project: Project, c: Criterion) -> tuple[int, str]:
     """手动填写的数字优先；没填就用评论归类的结果。"""
     if c.id in project.manual_counts:
-        return project.manual_counts[c.id], "手动填写"
+        return project.manual_counts[c.id], "自己填的"
     n = sum(
         1
         for o in project.observations
         if o.stance != Stance.against and o.level == c.level
     )
-    return n, "评论归类"
+    return n, "AI 归类"
 
 
 def desk_against(project: Project) -> list:
@@ -172,38 +172,38 @@ def evaluate(project: Project, now: datetime) -> Verdict:
         v.status = Status.paid
         for r in pay:
             v.reasons.append(
-                f"「{r.criterion.metric}」达到 {r.count}，你定的标准是 {r.criterion.threshold}。"
+                f"「{r.criterion.metric}」有 {r.count} 个，达到了你定的 {r.criterion.threshold} 个。"
             )
         for r in killed:
-            v.reasons.append(f"但「{r.criterion.metric}」没达标（{r.count}/{r.criterion.threshold}），值得想想为什么。")
+            v.reasons.append(f"不过「{r.criterion.metric}」只有 {r.count} 个，没到 {r.criterion.threshold} 个，值得想想为什么。")
     # 2. 到期没达标：触发你自己写下的淘汰条件
     elif killed:
         v.status = Status.negative
         for r in killed:
             v.reasons.append(
-                f"{r.criterion.days} 天到期，「{r.criterion.metric}」只有 {r.count}，"
-                f"没到你自己定的 {r.criterion.threshold}。按你锁定的标准，这个点子该放下了。"
+                f"{r.criterion.days} 天到了，「{r.criterion.metric}」只有 {r.count} 个，"
+                f"没到你自己定的 {r.criterion.threshold} 个。按你一开始定好的条件，这个点子该放下了。"
             )
     # 3. 案头资料里有足够多的行为级反对证据
     elif len(against) >= DESK_NEGATIVE_MIN:
         v.status = Status.negative
         v.reasons.append(
-            f"案头调研找到 {len(against)} 条行为级反对证据（例如已有人在用免费替代方案）。"
-            "这不代表一定失败，但你的实验需要先回答：为什么人们会放弃现有方案来用你的。"
+            f"网上找到 {len(against)} 条有分量的反对意见（比如已经有人在用免费的替代办法）。"
+            "这不代表一定会失败，但你得先回答一个问题：别人为什么要放下现在的办法，改用你的？"
         )
     # 4. 其余情况都是未验证
     else:
         if not project.research_done:
-            v.reasons.append("还没做调研，也没跑实验。")
+            v.reasons.append("还没看网上的资料，也还没发帖测试。")
         elif not project.experiment or not project.experiment.started_at:
-            v.reasons.append("案头调研只能证明到「行为」级别，证明不了有人会为你付钱。下一步是跑实验。")
+            v.reasons.append("网上的资料只能说明市场情况，证明不了有人会给你付钱。下一步是发帖测试。")
         else:
             for r in pay:
                 left = r.criterion.threshold - r.count
-                v.reasons.append(f"「{r.criterion.metric}」现在是 {r.count}，离标准还差 {left}。")
+                v.reasons.append(f"「{r.criterion.metric}」现在有 {r.count} 个，还差 {left} 个。")
             if not pay:
-                v.reasons.append("实验进行中。")
+                v.reasons.append("测试进行中。")
 
     if loosen:
-        v.reasons.append(f"注意：锁定后标准被放宽过 {loosen} 次。")
+        v.reasons.append(f"注意：条件定好之后又被放宽过 {loosen} 次。")
     return v

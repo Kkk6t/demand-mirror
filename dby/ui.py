@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import html
 
-from .models import DESK_RESEARCH_MAX, LEVEL_HINTS, LEVEL_NAMES, Evidence, Level, Observation, Stance, Status
+from .models import DESK_RESEARCH_MAX, LEVEL_HINTS, LEVEL_NAMES, OBS_LABELS, Evidence, Level, Observation, Stance, Status
 
 CSS = """
 <style>
@@ -43,7 +43,18 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 .step .s { font-size: .82rem; color: var(--muted); }
 .step.todo { border-top-color: var(--rule); }
 .step.todo .n, .step.todo h3 { color: #9AA6B8; }
-.lede { color: var(--muted); font-size: .95rem; margin: 0 0 .8rem 2.4rem; max-width: 70ch; }
+.lede { color: var(--muted); font-size: .95rem; margin: 0 0 .8rem; max-width: 70ch; line-height: 1.7; }
+.lede b { color: var(--ink); font-weight: 500; }
+
+/* 使用说明 */
+.howto { background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: .9rem 1.1rem; margin: 0 0 1rem; font-size: .93rem; line-height: 1.8; }
+.howto ol { margin: .3rem 0 0 1.2rem; padding: 0; }
+.howto li { margin: 0; }
+.notice { border-left: 3px solid var(--ink); background: #EEF2F7; padding: .7rem .9rem; margin: .4rem 0 .8rem; font-size: .92rem; line-height: 1.7; }
+.notice a { color: var(--ink); }
+.preview { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-size: 1rem; margin: .1rem 0 .3rem; }
+textarea:disabled, input:disabled { color: var(--ink) !important; -webkit-text-fill-color: var(--ink) !important; opacity: 1 !important; }
+.locked-note { font-size: .82rem; color: var(--muted); margin: -.4rem 0 .6rem; }
 
 /* 印章：整个界面唯一大胆的元素 */
 .stamp { display: inline-block; font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-weight: 900;
@@ -51,9 +62,10 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
          border-radius: 6px; transform: rotate(-7deg); letter-spacing: .12em; opacity: .92;
          mix-blend-mode: multiply; }
 .stamp.big { font-size: 2.4rem; padding: .6rem 1.6rem; border-width: 6px; }
-.stamp.未验证 { color: var(--grey); }
-.stamp.出现反向信号 { color: var(--red); }
-.stamp.出现付费信号 { color: var(--green); }
+.stamp.unverified { color: var(--grey); }
+.stamp.negative { color: var(--red); }
+.stamp.paid { color: var(--green); }
+.meaning { font-size: .86rem; color: var(--muted); margin: -.3rem 0 .2rem; }
 .stamp-wrap { padding: .6rem 0 1rem .4rem; }
 .stamp-wrap.anim { padding: 1.2rem 0 1.8rem .6rem; }
 .stamp-wrap.anim .stamp { animation: thud .32s cubic-bezier(.2,1.6,.4,1) both; }
@@ -74,7 +86,7 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 table.ledger { width: 100%; border-collapse: collapse; font-size: .9rem; margin: .4rem 0 1rem; background: var(--sheet); }
 .ledger th { text-align: left; font-weight: 500; color: var(--muted); font-size: .8rem; border-bottom: 1.5px solid var(--ink); padding: .4rem .5rem; }
 .ledger td { border-bottom: 1px solid var(--rule-soft); padding: .55rem .5rem; vertical-align: top; }
-.ledger td.k { white-space: nowrap; width: 4.2rem; }
+.ledger td.k { white-space: nowrap; }
 .ledger a { color: var(--ink); text-decoration-color: var(--rule); text-underline-offset: 3px; font-size: .82rem; }
 .ledger a:hover { text-decoration-color: var(--ink); }
 .hl { background: linear-gradient(transparent 58%, var(--mark) 58%); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
@@ -112,7 +124,7 @@ e = html.escape
 
 def masthead(mode: str) -> str:
     return f"""<div class="masthead"><h1>先别做</h1>
-<p>不预测你的点子行不行，只帮你拿到能推翻它的证据。</p>
+<p>动手写代码之前，先花一周搞清楚：到底有没有人要。</p>
 <div class="mode">{mode}</div></div>"""
 
 
@@ -126,7 +138,7 @@ def lede(text: str) -> str:
 
 
 def stamp(status: Status, big: bool = False, anim: bool = False) -> str:
-    cls = f"stamp {status.value}" + (" big" if big else "")
+    cls = f"stamp {status.name}" + (" big" if big else "")
     wrap = "stamp-wrap anim" if anim else "stamp-wrap"
     return f'<div class="{wrap}"><span class="{cls}">{e(status.value)}</span></div>'
 
@@ -136,11 +148,11 @@ def ladder(highest: Level) -> str:
     for lv in sorted(Level, reverse=True):
         on = " on" if lv <= highest else ""
         rows.append(
-            f'<div class="rung{on}"><span class="tag">L{int(lv)}</span>'
+            f'<div class="rung{on}"><span class="tag">{int(lv)}</span>'
             f"<span>{LEVEL_NAMES[lv]}<small>{LEVEL_HINTS[lv]}</small></span></div>"
         )
         if lv == DESK_RESEARCH_MAX + 1:
-            rows.append('<div class="cap">以上只能靠实验拿到</div>')
+            rows.append('<div class="cap">上面两级只能靠你自己发帖测试拿到</div>')
     return '<div class="ladder">' + "".join(rows) + "</div>"
 
 
@@ -155,23 +167,22 @@ def ledger(items: list[Evidence]) -> str:
         claim = f'<span class="hl">{e(x.claim)}</span>' if x.stance == Stance.against else e(x.claim)
         rows.append(
             f'<tr class="{x.stance.value}"><td class="k"><span class="pill {x.stance.value}">{x.stance.value}</span></td>'
-            f'<td class="k">L{int(x.level)} {LEVEL_NAMES[x.level]}</td>'
+            f'<td class="k">{LEVEL_NAMES[x.level]}</td>'
             f"<td>{claim}</td><td>{src}</td></tr>"
         )
-    head = "<tr><th>立场</th><th>等级</th><th>说明了什么</th><th>来源</th></tr>"
+    head = "<tr><th>态度</th><th>可信度</th><th>说明了什么</th><th>出处</th></tr>"
     return f'<table class="ledger">{head}{"".join(rows)}</table>'
 
 
 def observations(items: list[Observation]) -> str:
     rows = []
     for o in items:
-        stance = "反对" if o.stance == Stance.against else "支持"
-        lv = "—" if o.stance == Stance.against else f"L{int(o.level)} {LEVEL_NAMES[o.level]}"
+        stance = "反对" if o.stance == Stance.against else ("支持" if o.level >= Level.L3 else "中性")
         rows.append(
-            f'<tr class="{stance}"><td class="k"><span class="pill {stance}">{e(o.label)}</span></td>'
-            f'<td class="k">{lv}</td><td>{e(o.text)}</td></tr>'
+            f'<tr class="{stance}"><td class="k"><span class="pill {stance}">{e(OBS_LABELS.get(o.label, o.label))}</span></td>'
+            f'<td>{e(o.text)}</td></tr>'
         )
-    head = "<tr><th>归类</th><th>等级</th><th>原话</th></tr>"
+    head = "<tr><th>AI 归类</th><th>原话</th></tr>"
     return f'<table class="ledger">{head}{"".join(rows)}</table>'
 
 
@@ -179,5 +190,5 @@ def post(channel: str, title: str, body: str, cta: str, counts: str) -> str:
     t = f'<div class="t">{e(title)}</div>' if title else ""
     return (
         f'<div class="post"><div class="ch">{e(channel)}</div>{t}<div class="b">{e(body.strip()).replace(chr(10), "<br>")}</div>'
-        f'<div class="cta">{e(cta)}</div><div class="meta" style="margin-top:.4rem">数据计入：{e(counts)}</div></div>'
+        f'<div class="cta">{e(cta)}</div><div class="meta" style="margin-top:.4rem">有人照做了，就记到「{e(counts)}」</div></div>'
     )

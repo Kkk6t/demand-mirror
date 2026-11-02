@@ -4,15 +4,17 @@
 
 ## 判定
 
-**出现反向信号**　·　目前最高证据等级：L1 言论
+**先别做**　·　手里最硬的证据：嘴上说
 
-- 案头调研找到 3 条行为级反对证据（例如已有人在用免费替代方案）。这不代表一定失败，但你的实验需要先回答：为什么人们会放弃现有方案来用你的。
+你自己定的放弃条件被触发了，或者网上的反对意见很多。先别急着写代码。
+
+- 网上找到 3 条有分量的反对意见（比如已经有人在用免费的替代办法）。这不代表一定会失败，但你得先回答一个问题：别人为什么要放下现在的办法，改用你的？
 
 ## 点子
 
 做一个帮人验证产品点子的 AI 工具：用户说出想做的产品，工具联网搜索，分析这个点子合不合理、有没有需求，然后教他做最基础的宣传。
 
-## 追问
+## 3 个问题
 
 **第一批用户具体是谁？是想做副业的大学生、刚做出第一个工具的独立开发者，还是准备辞职创业的人？**
 
@@ -26,40 +28,40 @@
 
 我自己就卡在不知道需求在哪，前面做过几个项目都没人用。我在小红书和公众号写 AI 工具内容，能直接接触到同类人。
 
-## 最危险的假设
+## 最可能出错的地方
 
-| 类型 | 假设 | 什么情况说明它错了 |
+| 类型 | 你默认相信的事 | 出现什么情况说明它错了 |
 |---|---|---|
 | 需求 | 新手在动手写代码之前，愿意花几天时间验证点子。 | 访谈 5 个人，多数说「想到就做，从来不验证，也不打算」。 |
 | 需求 | 直接问通用 AI 得到的答案，不能让他们放心做决定。 | 多数人说「问 DeepSeek 就够了」，并且说不出不满意的地方。 |
 | 渠道 | 能在小红书、即刻这类地方低成本找到这群人。 | 两条帖子发出 7 天，主动私信少于 3 人。 |
 | 付费 | 有人愿意为一次有人跟进的验证付 9.9 元。 | 10 天内没有一个人付定金。 |
 
-## 淘汰标准
+## 放弃条件
 
-锁定于 2026-11-02 16:00，指纹 `265cb01e0e76`
+定于 2026-11-02 16:00（看资料之前），编号 `265cb01e0e76`
 
-| 标准 | 等级 | 当前 | 达标 |
+| 条件 | 数的是 | 现在 | 达到了吗 |
 |---|---|---|---|
-| 7 天内「私信要内测资格的人数」少于 5，就放弃 | L3 承诺 | 0 | 否 |
-| 10 天内「付 9.9 元定金的人数」少于 2，就放弃 | L4 付费 | 0 | 否 |
+| 7 天内，如果「私信要内测资格的人数」不到 5 个，就放弃 | 留了联系方式 | 0 | 还没 |
+| 10 天内，如果「付 9.9 元定金的人数」不到 2 个，就放弃 | 付了钱 | 0 | 还没 |
 
-## 证据台账
+## 网上找到的资料
 
-案头资料最高只能到 L2（行为），证明不了有人会为你付钱。
+网上的资料只能说明市场情况，证明不了有人会给你付钱。反对意见排在前面。
 
-| 立场 | 等级 | 说明了什么 | 来源 |
+| 态度 | 可信度 | 说明了什么 | 出处 |
 |---|---|---|---|
-| 反对 | L2 | 一个 AI 工具目录就收录了约 50 款「产品验证」类工具，多数是免费增值，同类产品已经很多。 | [Product Validation AI tools（topai.tools）](https://topai.tools/s/product-validation) |
-| 反对 | L2 | 已经有人把验证流程整理成十几条免费 prompt，直接交给通用 AI 就能跑，替代成本几乎为零。 | [Best AI prompts to validate an idea before you build（Rocket）](https://www.rocket.new/blog/best-ai-prompts-to-validate-an-idea-before-you-build) |
-| 反对 | L2 | 有专门的教程教人直接用 ChatGPT 验证创业点子，说明不少人已经在这么做。 | [How to Use ChatGPT to Validate a Startup Idea（Preuve）](https://preuve.ai/blog/how-to-use-chatgpt-to-validate-a-startup-idea) |
-| 反对 | L1 | 已经有产品专门把目标用户定为学生创业者，和本产品想找的第一批用户重合。 | [StartupValidator AI](https://www.turbostarter.dev/ideas/ai/startupvalidator-ai) |
-| 反对 | L1 | 有竞品直接给出「做还是重新想」的结论。用户可能就想要一个明确答案，而本产品刻意不给。 | [Ideation.biz](https://index.dodopayments.com/https-ideation-biz) |
-| 支持 | L1 | 有人在卖付费的上市前验证指南，说明「怎么验证」这件事有人愿意花钱学。 | [Go-to-Market Validation Guide（Gumroad）](https://jonathanmillspatrick.gumroad.com/l/gtm-validation-guide) |
-| 支持 | L0 | 「先卖再做」被反复推荐，用预售验证需求的方法本身有共识，本产品把它做成了流程。 | [The Best Way to Validate Your Idea Is to Sell It Before You Build It](https://blog.mean.ceo/?p=2806) |
-| 支持 | L0 | 一篇文章指出 AI 能整理调研、设计访谈，但没有真实用户的行为证据，它证明不了需求。 | [Can AI Help You Validate a Product Idea Before Building?（Verdent）](https://www.verdent.ai/guides/answers/ai-validate-product-idea-before-building) |
-| 支持 | L0 | 自动生成的验证报告给好几个点子都打了同样的高分，现有工具的乐观偏差是真实存在的。 | [AI-Powered Startup Idea Validator（AnotherWrapper 示例报告）](https://anotherwrapper.com/tools/startup-idea-validator/ai-powered-startup-idea-validator-unlocking-success-before-you-launch) |
-| 中性 | L1 | Product Hunt 上还有更多同类「点子测试」产品在发布。 | [Founderli Idea Tester](https://www.producthunt.com/products/founderli-idea-tester) |
+| 反对 | 在花钱花时间 | 一个 AI 工具目录就收录了约 50 款「产品验证」类工具，多数是免费增值，同类产品已经很多。 | [Product Validation AI tools（topai.tools）](https://topai.tools/s/product-validation) |
+| 反对 | 在花钱花时间 | 已经有人把验证流程整理成十几条免费 prompt，直接交给通用 AI 就能跑，替代成本几乎为零。 | [Best AI prompts to validate an idea before you build（Rocket）](https://www.rocket.new/blog/best-ai-prompts-to-validate-an-idea-before-you-build) |
+| 反对 | 在花钱花时间 | 有专门的教程教人直接用 ChatGPT 验证创业点子，说明不少人已经在这么做。 | [How to Use ChatGPT to Validate a Startup Idea（Preuve）](https://preuve.ai/blog/how-to-use-chatgpt-to-validate-a-startup-idea) |
+| 反对 | 嘴上说 | 已经有产品专门把目标用户定为学生创业者，和本产品想找的第一批用户重合。 | [StartupValidator AI](https://www.turbostarter.dev/ideas/ai/startupvalidator-ai) |
+| 反对 | 嘴上说 | 有竞品直接给出「做还是重新想」的结论。用户可能就想要一个明确答案，而本产品刻意不给。 | [Ideation.biz](https://index.dodopayments.com/https-ideation-biz) |
+| 支持 | 嘴上说 | 有人在卖付费的上市前验证指南，说明「怎么验证」这件事有人愿意花钱学。 | [Go-to-Market Validation Guide（Gumroad）](https://jonathanmillspatrick.gumroad.com/l/gtm-validation-guide) |
+| 支持 | 猜的 | 「先卖再做」被反复推荐，用预售验证需求的方法本身有共识，本产品把它做成了流程。 | [The Best Way to Validate Your Idea Is to Sell It Before You Build It](https://blog.mean.ceo/?p=2806) |
+| 支持 | 猜的 | 一篇文章指出 AI 能整理调研、设计访谈，但没有真实用户的行为证据，它证明不了需求。 | [Can AI Help You Validate a Product Idea Before Building?（Verdent）](https://www.verdent.ai/guides/answers/ai-validate-product-idea-before-building) |
+| 支持 | 猜的 | 自动生成的验证报告给好几个点子都打了同样的高分，现有工具的乐观偏差是真实存在的。 | [AI-Powered Startup Idea Validator（AnotherWrapper 示例报告）](https://anotherwrapper.com/tools/startup-idea-validator/ai-powered-startup-idea-validator-unlocking-success-before-you-launch) |
+| 中性 | 嘴上说 | Product Hunt 上还有更多同类「点子测试」产品在发布。 | [Founderli Idea Tester](https://www.producthunt.com/products/founderli-idea-tester) |
 
 <details><summary>搜索词</summary>
 
@@ -72,7 +74,7 @@
 
 </details>
 
-## 7 天验证实验
+## 一周发帖测试
 
 开始时间：—
 
@@ -84,7 +86,7 @@
 - 第 6 天：把访谈原话粘贴进第 6 步归类，看言论和行动的比例。
 - 第 7 天：对照锁定的标准数数字，不改标准，直接看判定。
 
-### 可计数的宣传
+### 要发的帖子
 
 **小红书**：做了 3 个工具都没人用，这次我先验证再写代码
 
@@ -97,24 +99,24 @@
 
 它不会告诉你点子好不好，只会告诉你现在有没有证据。
 
-行动：想试的私信我你的点子，前 10 个人我亲自帮你跑一遍。　→ 计入「私信要内测资格的人数」
+让读者做的事：想试的私信我你的点子，前 10 个人我亲自帮你跑一遍。　→ 记到「私信要内测资格的人数」
 
 **即刻**
 
 做产品前最该花的不是开发时间，是验证时间。
-我把自己验证点子的流程做成了一个工具：先锁淘汰标准，再找反对证据，再跑一周实验。
+我把自己验证点子的流程做成了一个工具：先定好放弃条件，再找反对意见，再发帖测试一周。
 现在想找几个人一起跑真实案例。
 
-行动：付 9.9 元定金，我用这套流程陪你验证一个点子，7 天内没交付全额退。　→ 计入「付 9.9 元定金的人数」
+让读者做的事：付 9.9 元定金，我用这套流程陪你验证一个点子，7 天内没交付全额退。　→ 记到「付 9.9 元定金的人数」
 
 **副业或独立开发社群**
 
 有没有人和我一样，做完东西才发现没人要？
 我在做一个帮人提前验证点子的小工具，不打分、不画饼，只帮你拿到真实用户的反应。
 
-行动：填这个表预约内测（只要一个联系方式和你的点子）。　→ 计入「私信要内测资格的人数」
+让读者做的事：填这个表预约内测（只要一个联系方式和你的点子）。　→ 记到「私信要内测资格的人数」
 
-### 访谈问题
+### 去问人的问题
 
 1. 你上一个想做的东西是什么？从想到它到动手，中间隔了多久？
 2. 那次你有没有做什么来确认有人要？具体做了什么？
