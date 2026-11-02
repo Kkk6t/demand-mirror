@@ -13,6 +13,25 @@ class SearchError(RuntimeError):
     pass
 
 
+SIGNUP = {"博查": "open.bochaai.com", "Tavily": "tavily.com"}
+
+
+def _explain(provider: str, e: Exception) -> SearchError:
+    """把技术报错翻译成人话。"""
+    code = getattr(getattr(e, "response", None), "status_code", None)
+    site = SIGNUP.get(provider, "")
+    if code in (401, 403):
+        msg = (f"{provider}的搜索 Key 不对，被拒绝了。注意：搜索 Key 和 DeepSeek 的 Key 是两个不同的东西，"
+               f"要到 {site} 单独注册申请，不能填 DeepSeek 的。")
+    elif code == 402 or code == 429:
+        msg = f"{provider}账户的额度用完了，或者搜得太频繁。去 {site} 看看余额，或者过一会儿再试。"
+    elif code is not None:
+        msg = f"{provider}搜索出错了（错误码 {code}），稍后再试。"
+    else:
+        msg = f"连不上{provider}，检查一下网络。"
+    return SearchError(msg)
+
+
 class Searcher(Protocol):
     name: str
 
@@ -39,7 +58,7 @@ class BochaSearch:
             r.raise_for_status()
             items = (r.json().get("data") or {}).get("webPages", {}).get("value", []) or []
         except Exception as e:
-            raise SearchError(f"博查搜索失败：{e}") from e
+            raise _explain("博查", e) from e
         return [
             SearchResult(
                 title=i.get("name", ""),
@@ -65,13 +84,14 @@ class TavilySearch:
         try:
             r = requests.post(
                 self.URL,
+                headers={"Authorization": f"Bearer {self.api_key}"},
                 json={"api_key": self.api_key, "query": query, "max_results": n},
                 timeout=30,
             )
             r.raise_for_status()
             items = r.json().get("results", []) or []
         except Exception as e:
-            raise SearchError(f"Tavily 搜索失败：{e}") from e
+            raise _explain("Tavily", e) from e
         return [
             SearchResult(
                 title=i.get("title", ""),

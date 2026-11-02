@@ -157,6 +157,13 @@ def plan_queries(p: Project, llm: LLM) -> list[SearchQuery]:
     return qs[:10]
 
 
+def skip_research(p: Project) -> None:
+    """不搜了，直接进入下一步。"""
+    if not p.lock.locked:
+        raise RuleError("先定好放弃条件。")
+    p.research_done = True
+
+
 def run_research(p: Project, llm: LLM, searcher: Searcher) -> list[str]:
     """返回过程中的提示信息（例如某条搜索失败）。"""
     if not p.lock.locked:
@@ -172,18 +179,19 @@ def run_research(p: Project, llm: LLM, searcher: Searcher) -> list[str]:
             found = searcher.search(q.query, n=5)
         except SearchError as e:
             failures += 1
-            notes.append(str(e))
+            if str(e) not in notes:
+                notes.append(str(e))
             continue
         for r in found:
             if r.url not in seen:
                 seen.add(r.url)
                 results.append(r)
     if p.queries and failures == len(p.queries):
-        raise SearchError("所有搜索都失败了：" + notes[0])
+        raise SearchError(notes[0])
     p.search_results = results[:MAX_RESULTS_TO_MODEL]
 
     if not p.search_results:
-        notes.append("没有搜到任何资料。没接搜索时，台账会是空的，状态保持未验证。")
+        notes.append("这次没有搜到资料，所以没有反对意见可看。可以直接进入下一步。")
         p.evidence = []
         p.research_done = True
         return notes
@@ -217,7 +225,7 @@ def run_research(p: Project, llm: LLM, searcher: Searcher) -> list[str]:
             )
         )
     if dropped:
-        notes.append(f"丢弃了 {dropped} 条引用不到真实来源的证据。")
+        notes.append(f"AI 有 {dropped} 条说法找不到出处，已经去掉了。")
     order = {Stance.against: 0, Stance.support: 1, Stance.neutral: 2}
     evidence.sort(key=lambda x: (order[x.stance], -int(x.level)))
     p.evidence = evidence

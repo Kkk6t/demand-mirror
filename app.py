@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from dby import pipeline, storage, ui
-from dby.config import PRESETS, Settings, build, build_demo
+from dby.config import PRESETS, Settings, build, build_demo, save_env
 from dby.demo import DEMO_ANSWERS, DEMO_IDEA, DEMO_RAW_COMMENTS
 from dby.llm import LLMError
 from dby.models import LEVEL_NAMES, STATUS_MEANING, Criterion, Level, Project, Stance
@@ -18,7 +18,7 @@ from dby.report import to_markdown
 from dby.rules import RuleError, change_criteria, evaluate, lock_criteria
 from dby.search import SearchError
 
-load_dotenv()
+load_dotenv(override=True)
 st.set_page_config(page_title="先别做", page_icon="🔖", layout="centered")
 st.html(ui.CSS)
 # 页面本身是中文，但 Streamlit 默认把 <html> 标成英文，浏览器会自动"翻译"，
@@ -71,8 +71,10 @@ def run(fn, *args, spinner: str = "处理中…"):
         return out, True
     except RuleError as err:
         st.warning(str(err))
-    except (LLMError, SearchError) as err:
-        st.error(f"{err}\n\n检查 API Key 和模型名是否填对、账户里有没有余额，或者稍后再试。")
+    except SearchError as err:
+        st.error(f"{err}\n\n改好后点左边「AI 和搜索设置」里的「保存」，再搜一次。也可以点「不搜了，直接下一步」。")
+    except LLMError as err:
+        st.error(f"AI 调用失败：{err}\n\n检查 DeepSeek 的 API Key 是否填对、账户里有没有余额，或者稍后再试。")
     return None, False
 
 
@@ -142,13 +144,19 @@ with st.sidebar:
         model = st.text_input("模型名", value=model_default if preset != "自定义" else settings.llm_model)
         key = st.text_input("API Key", value=settings.llm_api_key, type="password")
         choices = ["博查", "Tavily", "不接搜索"]
+        st.caption("联网搜索是另一家公司的服务，需要另外申请一个 Key，和上面 AI 的 Key 不是同一个。博查：open.bochaai.com，Tavily：tavily.com")
         provider = st.radio("联网搜索用哪家", choices, horizontal=True,
                             index=choices.index(settings.search_provider) if settings.search_provider in choices else 0)
         skey = st.text_input("搜索的 API Key", value=settings.search_api_key, type="password", disabled=provider == "不接搜索")
+        remember = st.checkbox("记住，下次打开不用重填", value=True, help="保存在项目文件夹的 .env 文件里，不会上传到 GitHub。")
         if st.button("保存", use_container_width=True):
-            ss.settings = Settings(base, key, model, provider, skey)
-            st.rerun()
-        st.caption("Key 只在这次打开的页面里有效，关掉要重填。想一直生效，写进项目文件夹里的 .env 文件。")
+            if provider != "不接搜索" and skey.strip() and skey.strip() == key.strip():
+                st.warning("搜索 Key 和 AI 的 Key 填成一样的了。搜索 Key 要到博查或 Tavily 官网单独申请。")
+            else:
+                ss.settings = Settings(base, key.strip(), model, provider, skey.strip())
+                if remember:
+                    save_env(ss.settings)
+                st.rerun()
 
     if p.demo and p.experiment and p.experiment.started_at:
         st.divider()
@@ -210,6 +218,7 @@ elif needs_key:
         else:
             base, model = PRESETS["DeepSeek"]
             ss.settings = Settings(base, new_key.strip(), model, "博查" if new_skey.strip() else "不接搜索", new_skey.strip())
+            save_env(ss.settings)
             st.rerun()
 
 # ---------------- 第 1 步 ----------------
@@ -362,11 +371,19 @@ if p.lock.locked:
         unsafe_allow_html=True,
     )
     if searcher.name == "未接入搜索":
-        st.info("还没接联网搜索，这一步会搜不到东西。可以在左边「AI 和搜索设置」里填博查的 Key，也可以直接跳到下一步。")
-    if st.button("开始搜", type="primary" if not p.research_done else "secondary"):
+        st.info("还没接联网搜索，这一步会搜不到东西。可以在左边「AI 和搜索设置」里填博查或 Tavily 的 Key，也可以直接跳到下一步。")
+    elif not p.demo:
+        st.markdown(f'<div class="meta">现在用的搜索：{ui.e(searcher.name)}</div>', unsafe_allow_html=True)
+    b1, b2 = st.columns([1, 3])
+    if b1.button("开始搜", type="primary" if not p.research_done else "secondary"):
+        ss.research_notes = []
         notes, ok = run(pipeline.run_research, p, llm, searcher, spinner="AI 正在搜索并整理资料，大概要一分钟…")
         if ok:
             ss.research_notes = notes
+            st.rerun()
+    if not p.research_done and b2.button("不搜了，直接下一步"):
+        _, ok = run(pipeline.skip_research, p)
+        if ok:
             st.rerun()
     for n in ss.get("research_notes", []):
         st.caption(n)

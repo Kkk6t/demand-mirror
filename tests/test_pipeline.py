@@ -89,7 +89,7 @@ def test_invented_sources_are_dropped_and_levels_capped():
     notes = pipeline.run_research(p, fake, DemoSearch(DEMO_SEARCH))
     assert len(p.evidence) == 1
     assert p.evidence[0].level == Level.L2
-    assert any("丢弃了 2 条" in n for n in notes)
+    assert any("有 2 条说法找不到出处" in n for n in notes)
 
 
 def test_against_queries_are_topped_up_by_code():
@@ -123,3 +123,35 @@ def test_hype_in_model_output_is_intercepted():
     pipeline.ask_questions(p, fake)
     assert "刚需" not in p.questions[0].question
     assert len(p.guard_hits) == 2
+
+
+def test_search_401_is_explained_in_plain_words():
+    import requests
+    from dby.search import _explain
+
+    resp = requests.Response()
+    resp.status_code = 401
+    err = _explain("博查", requests.HTTPError(response=resp))
+    assert "Key 不对" in str(err) and "open.bochaai.com" in str(err)
+
+
+def test_skip_research_moves_on():
+    p = Project(idea="x")
+    pipeline.draft_criteria(p, DemoLLM(DEMO_RESPONSES))
+    lock_criteria(p, NOW)
+    pipeline.skip_research(p)
+    assert p.research_done and p.evidence == []
+    assert evaluate(p, NOW).status == Status.unverified
+
+
+def test_save_env_roundtrip(tmp_path, monkeypatch):
+    for k in ("LLM_BASE_URL", "LLM_MODEL", "LLM_API_KEY", "SEARCH_PROVIDER", "SEARCH_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    from dby.config import Settings, save_env
+
+    s = Settings("https://api.deepseek.com", "sk-a", "deepseek-chat", "博查", "sk-b")
+    f = tmp_path / ".env"
+    save_env(s, f)
+    text = f.read_text(encoding="utf-8")
+    assert "LLM_API_KEY=sk-a" in text and "SEARCH_API_KEY=sk-b" in text
+    assert Settings.from_env().search_api_key == "sk-b"

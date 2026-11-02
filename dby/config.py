@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 from .demo import DEMO_RESPONSES, DEMO_SEARCH
 from .llm import LLM, DemoLLM, OpenAICompatLLM
@@ -55,3 +56,22 @@ def build(s: Settings) -> tuple[LLM, Searcher]:
     if s.search_provider == "Tavily" and key:
         return llm, TavilySearch(key)
     return llm, NoSearch()
+
+
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+
+
+def save_env(s: Settings, path: Path = ENV_PATH) -> None:
+    """把设置写进项目文件夹的 .env，下次打开自动读取。.env 已在 .gitignore 里，不会传到 GitHub。"""
+    lines = [
+        "# 先别做的本机设置。这个文件不会上传到 GitHub。",
+        f"LLM_BASE_URL={s.llm_base_url}",
+        f"LLM_MODEL={s.llm_model}",
+        f"LLM_API_KEY={s.llm_api_key}",
+        f"SEARCH_PROVIDER={s.search_provider}",
+        f"SEARCH_API_KEY={s.search_api_key}",
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for k, v in [("LLM_BASE_URL", s.llm_base_url), ("LLM_MODEL", s.llm_model), ("LLM_API_KEY", s.llm_api_key),
+                 ("SEARCH_PROVIDER", s.search_provider), ("SEARCH_API_KEY", s.search_api_key)]:
+        os.environ[k] = v
