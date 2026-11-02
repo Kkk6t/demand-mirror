@@ -124,13 +124,30 @@ flowchart LR
 
 ## 下载和运行
 
-### Windows：双击就能用
+### Windows
 
 1. **装 Python**（装过就跳过）：到 [python.org/downloads](https://www.python.org/downloads/) 下载 3.10 或更高版本。安装第一屏一定要勾选最下面的 **Add python.exe to PATH**。
-2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接双击。
-3. **双击 `run-windows.bat`**。如果弹出蓝色的「Windows 已保护你的电脑」，点「更多信息」→「仍要运行」（这是 Windows 对网上下载的脚本的默认提醒，脚本内容可以直接用记事本打开查看）。第一次会自动准备环境、安装组件，大约 1 到 3 分钟；以后再双击几秒就打开。浏览器会自动打开页面。
+2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接打开。
+3. **在项目文件夹里打开命令行**：一层层点进解压出来的文件夹，直到能看到 `app.py`。点一下窗口顶部的地址栏，把里面的路径删掉，输入 `cmd`，按回车，会弹出一个黑色窗口。
+4. **第一次用，先装组件**（只需要一次，大约 1 到 3 分钟）：
 
-用完关掉那个黑色窗口就行。
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   国内下载慢的话，换成这一行：
+
+   ```bash
+   pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+   ```
+
+5. **启动**（以后每次用都只要这一步）：
+
+   ```bash
+   streamlit run app.py
+   ```
+
+   浏览器会自动打开页面。没打开的话，手动访问 `http://localhost:8501`。用完关掉黑色窗口就行。
 
 ### macOS / Linux
 
@@ -154,10 +171,10 @@ streamlit run app.py
 
 | 现象 | 怎么办 |
 |---|---|
-| 双击 `run-windows.bat` 弹出蓝色的「Windows 已保护你的电脑」 | 这是 Windows 对所有网上下载的脚本的默认提醒。点「更多信息」，再点「仍要运行」 |
-| 弹窗里没有「仍要运行」，直接被拦截 | 删掉解压出来的文件夹。右键下载的 zip →「属性」→ 勾选最下面的「解除锁定」→「确定」，再重新解压、双击 |
-| 还是被拦 | 在文件夹地址栏输入 `cmd` 回车，在打开的黑色窗口里输入 `run-windows.bat` 回车，效果一样 |
-| 双击 `run-windows.bat` 提示没有找到 Python | 安装 Python 时没勾选 Add to PATH。重新运行安装程序，选 Modify，勾上它 |
+| 提示 `pip` 不是内部或外部命令 | 改成输入 `python -m pip install -r requirements.txt` |
+| 提示 `python` 不是内部或外部命令 | 安装 Python 时没勾选 Add to PATH。重新运行安装程序，选 Modify，勾上它，然后重新打开黑色窗口 |
+| 提示 `streamlit` 不是内部或外部命令 | 改成输入 `python -m streamlit run app.py` |
+| 提示找不到 `requirements.txt` | 黑色窗口没在项目文件夹里打开。回到第 3 步，确认那一层能看到 `app.py` |
 | 浏览器打开后一片空白 | 浏览器或翻译插件在自动翻译页面。对 `localhost` 关掉翻译，或者用无痕窗口打开 |
 | 提示「DeepSeek 不认这个 Key」 | Key 没复制完整，重新复制一次 |
 | 提示余额不足 | 到 DeepSeek 平台充值 |
@@ -182,7 +199,6 @@ streamlit run app.py
 ## 项目结构
 
 ```
-run-windows.bat     Windows 一键启动
 run-mac.command     macOS / Linux 一键启动
 app.py              Streamlit 界面
 dby/
