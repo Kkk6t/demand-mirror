@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .demo import DEMO_RESPONSES, DEMO_SEARCH
 from .llm import LLM, DemoLLM, OpenAICompatLLM
-from .search import BochaSearch, NoSearch, Searcher, TavilySearch, DemoSearch
+from .search import BochaSearch, DeepSeekSearch, NoSearch, Searcher, TavilySearch, DemoSearch
 
 PRESETS = {
     "DeepSeek": ("https://api.deepseek.com", "deepseek-chat"),
@@ -23,7 +23,7 @@ class Settings:
     llm_base_url: str = ""
     llm_api_key: str = ""
     llm_model: str = ""
-    search_provider: str = "博查"  # 博查 / Tavily / 不接搜索
+    search_provider: str = "DeepSeek"  # DeepSeek / 博查 / Tavily / 不接搜索
     search_api_key: str = ""
 
     @classmethod
@@ -33,7 +33,7 @@ class Settings:
             llm_base_url=os.getenv("LLM_BASE_URL", base),
             llm_api_key=os.getenv("LLM_API_KEY", ""),
             llm_model=os.getenv("LLM_MODEL", model),
-            search_provider=os.getenv("SEARCH_PROVIDER", "博查"),
+            search_provider=os.getenv("SEARCH_PROVIDER", "DeepSeek"),
             search_api_key=os.getenv("SEARCH_API_KEY", ""),
         )
 
@@ -51,6 +51,13 @@ def build(s: Settings) -> tuple[LLM, Searcher]:
         return build_demo()
     llm = OpenAICompatLLM(s.llm_base_url.strip(), s.llm_api_key.strip(), s.llm_model.strip())
     key = s.search_api_key.strip()
+    if s.search_provider == "DeepSeek":
+        # 只有用 DeepSeek 官方接口时，才能拿同一个 Key 搜索
+        if "api.deepseek.com" in s.llm_base_url:
+            return llm, DeepSeekSearch(s.llm_api_key.strip())
+        if key:
+            return llm, DeepSeekSearch(key)
+        return llm, NoSearch()
     if s.search_provider == "博查" and key:
         return llm, BochaSearch(key)
     if s.search_provider == "Tavily" and key:

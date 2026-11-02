@@ -72,7 +72,7 @@ def run(fn, *args, spinner: str = "处理中…"):
     except RuleError as err:
         st.warning(str(err))
     except SearchError as err:
-        st.error(f"{err}\n\n改好后点左边「AI 和搜索设置」里的「保存」，再搜一次。也可以点「不搜了，直接下一步」。")
+        st.error(f"{err}\n\n最省事的办法：在左边「AI 和搜索设置」里把「联网搜索用哪家」选成 DeepSeek，点「保存」，再搜一次。也可以点「不搜了，直接下一步」。")
     except LLMError as err:
         st.error(f"AI 调用失败：{err}\n\n检查 DeepSeek 的 API Key 是否填对、账户里有没有余额，或者稍后再试。")
     return None, False
@@ -143,15 +143,25 @@ with st.sidebar:
         base = st.text_input("接口地址", value=base_default if preset != "自定义" else settings.llm_base_url)
         model = st.text_input("模型名", value=model_default if preset != "自定义" else settings.llm_model)
         key = st.text_input("API Key", value=settings.llm_api_key, type="password")
-        choices = ["博查", "Tavily", "不接搜索"]
-        st.caption("联网搜索是另一家公司的服务，需要另外申请一个 Key，和上面 AI 的 Key 不是同一个。博查：open.bochaai.com，Tavily：tavily.com")
+        choices = ["DeepSeek", "博查", "Tavily", "不接搜索"]
         provider = st.radio("联网搜索用哪家", choices, horizontal=True,
                             index=choices.index(settings.search_provider) if settings.search_provider in choices else 0)
-        skey = st.text_input("搜索的 API Key", value=settings.search_api_key, type="password", disabled=provider == "不接搜索")
+        same_key = provider == "DeepSeek" and "api.deepseek.com" in base
+        if same_key:
+            st.caption("用 DeepSeek 搜索，和上面是同一个 Key，不用另外填。每次分析大约搜 8 次，搜索费用不到 5 分钱。")
+            skey = ""
+        elif provider == "不接搜索":
+            skey = ""
+        else:
+            if provider == "DeepSeek":
+                st.caption("上面用的不是 DeepSeek，所以这里要单独填一个 DeepSeek 的 Key。")
+            else:
+                st.caption(f"{provider}是另一家公司的服务，要到它的官网单独申请 Key，和上面 AI 的 Key 不是同一个。")
+            skey = st.text_input("搜索的 API Key", value=settings.search_api_key, type="password")
         remember = st.checkbox("记住，下次打开不用重填", value=True, help="保存在项目文件夹的 .env 文件里，不会上传到 GitHub。")
         if st.button("保存", use_container_width=True):
-            if provider != "不接搜索" and skey.strip() and skey.strip() == key.strip():
-                st.warning("搜索 Key 和 AI 的 Key 填成一样的了。搜索 Key 要到博查或 Tavily 官网单独申请。")
+            if provider in ("博查", "Tavily") and skey.strip() and skey.strip() == key.strip():
+                st.warning(f"搜索 Key 和 AI 的 Key 填成一样的了。{provider}的 Key 要到它的官网单独申请；或者搜索改选 DeepSeek，就不用另外填。")
             else:
                 ss.settings = Settings(base, key.strip(), model, provider, skey.strip())
                 if remember:
@@ -205,19 +215,13 @@ elif needs_key:
     )
     k1, k2 = st.columns([4, 1], vertical_alignment="bottom")
     new_key = k1.text_input("DeepSeek API Key", type="password", placeholder="sk-…")
-    with st.expander("也想让它联网搜资料？（可选，不填也能用）"):
-        st.markdown(
-            '国内推荐博查：到 <a href="https://open.bochaai.com" target="_blank">open.bochaai.com</a> 注册并创建 Key。'
-            "不填的话，第 4 步「网上的反对意见」会是空的。",
-            unsafe_allow_html=True,
-        )
-        new_skey = st.text_input("博查 API Key", type="password")
+    st.caption("这一个 Key 同时管提问和联网搜索，不用再申请别的。")
     if k2.button("连接", type="primary", use_container_width=True):
         if not new_key.strip():
             st.warning("先把 Key 粘贴进去。")
         else:
             base, model = PRESETS["DeepSeek"]
-            ss.settings = Settings(base, new_key.strip(), model, "博查" if new_skey.strip() else "不接搜索", new_skey.strip())
+            ss.settings = Settings(base, new_key.strip(), model, "DeepSeek", "")
             save_env(ss.settings)
             st.rerun()
 
@@ -371,7 +375,7 @@ if p.lock.locked:
         unsafe_allow_html=True,
     )
     if searcher.name == "未接入搜索":
-        st.info("还没接联网搜索，这一步会搜不到东西。可以在左边「AI 和搜索设置」里填博查或 Tavily 的 Key，也可以直接跳到下一步。")
+        st.info("还没接联网搜索，这一步会搜不到东西。在左边「AI 和搜索设置」里把「联网搜索用哪家」选成 DeepSeek 并保存就行；也可以直接跳到下一步。")
     elif not p.demo:
         st.markdown(f'<div class="meta">现在用的搜索：{ui.e(searcher.name)}</div>', unsafe_allow_html=True)
     b1, b2 = st.columns([1, 3])

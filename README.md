@@ -125,8 +125,8 @@ streamlit run app.py
 | 配置 | 说明 |
 |---|---|
 | `LLM_API_KEY` | 任何 OpenAI 兼容接口都行。默认 DeepSeek，侧边栏也预设了通义千问、Kimi、OpenAI |
-| `SEARCH_PROVIDER` | `博查`（国内，[open.bochaai.com](https://open.bochaai.com)）或 `Tavily`（海外，[tavily.com](https://tavily.com)） |
-| `SEARCH_API_KEY` | 对应搜索服务的 Key。不接搜索也能用，只是第 4 步会搜不到资料 |
+| `SEARCH_PROVIDER` | 默认 `DeepSeek`：用 [DeepSeek 官方搜索接口](https://api-docs.deepseek.com/guides/search/)，和对话共用一个 Key。也可以选 `博查`（[open.bochaai.com](https://open.bochaai.com)）或 `Tavily`（[tavily.com](https://tavily.com)） |
+| `SEARCH_API_KEY` | 只有选博查或 Tavily 时才需要。不接搜索也能用，只是第 4 步会搜不到资料 |
 
 项目会自动存档到 `data/projects/`，实验跑到第几天回来打开就行。也可以在侧边栏「备份 / 恢复」里下载和上传备份文件。
 
@@ -145,7 +145,7 @@ dby/
   pipeline.py       六个步骤的编排和模型输出校验
   prompts.py        所有 prompt
   llm.py            OpenAI 兼容接口 + 演示模式
-  search.py         博查、Tavily
+  search.py         DeepSeek 官方搜索、博查、Tavily
   report.py         导出 Markdown 报告
   storage.py        项目存档
   demo.py           自我验证案例的演示数据

@@ -155,3 +155,11 @@ def test_save_env_roundtrip(tmp_path, monkeypatch):
     text = f.read_text(encoding="utf-8")
     assert "LLM_API_KEY=sk-a" in text and "SEARCH_API_KEY=sk-b" in text
     assert Settings.from_env().search_api_key == "sk-b"
+
+
+def test_deepseek_search_reuses_llm_key():
+    from dby.config import Settings, build
+    from dby.search import DeepSeekSearch
+
+    _, s = build(Settings("https://api.deepseek.com", "sk-ds", "deepseek-chat", "DeepSeek", ""))
+    assert isinstance(s, DeepSeekSearch) and s.api_key == "sk-ds"
