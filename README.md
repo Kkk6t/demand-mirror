@@ -128,7 +128,7 @@ flowchart LR
 
 1. **装 Python**（装过就跳过）：到 [python.org/downloads](https://www.python.org/downloads/) 下载 3.10 或更高版本。安装第一屏一定要勾选最下面的 **Add python.exe to PATH**。
 2. **下载这个项目**：[点这里下载压缩包](https://github.com/Kkk6t/dont-build-yet/archive/refs/heads/main.zip)，右键「全部解压缩」。注意要真的解压，不要在压缩包里直接双击。
-3. **双击 `run-windows.bat`**。第一次会自动准备环境、安装组件，大约 1 到 3 分钟；以后再双击几秒就打开。浏览器会自动打开页面。
+3. **双击 `run-windows.bat`**。如果弹出蓝色的「Windows 已保护你的电脑」，点「更多信息」→「仍要运行」（这是 Windows 对网上下载的脚本的默认提醒，脚本内容可以直接用记事本打开查看）。第一次会自动准备环境、安装组件，大约 1 到 3 分钟；以后再双击几秒就打开。浏览器会自动打开页面。
 
 用完关掉那个黑色窗口就行。
 
@@ -154,6 +154,9 @@ streamlit run app.py
 
 | 现象 | 怎么办 |
 |---|---|
+| 双击 `run-windows.bat` 弹出蓝色的「Windows 已保护你的电脑」 | 这是 Windows 对所有网上下载的脚本的默认提醒。点「更多信息」，再点「仍要运行」 |
+| 弹窗里没有「仍要运行」，直接被拦截 | 删掉解压出来的文件夹。右键下载的 zip →「属性」→ 勾选最下面的「解除锁定」→「确定」，再重新解压、双击 |
+| 还是被拦 | 在文件夹地址栏输入 `cmd` 回车，在打开的黑色窗口里输入 `run-windows.bat` 回车，效果一样 |
 | 双击 `run-windows.bat` 提示没有找到 Python | 安装 Python 时没勾选 Add to PATH。重新运行安装程序，选 Modify，勾上它 |
 | 浏览器打开后一片空白 | 浏览器或翻译插件在自动翻译页面。对 `localhost` 关掉翻译，或者用无痕窗口打开 |
 | 提示「DeepSeek 不认这个 Key」 | Key 没复制完整，重新复制一次 |
