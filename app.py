@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from dby import pipeline, storage, ui
@@ -20,6 +21,20 @@ from dby.search import SearchError
 load_dotenv()
 st.set_page_config(page_title="先别做", page_icon="🔖", layout="centered")
 st.html(ui.CSS)
+# 页面本身是中文，但 Streamlit 默认把 <html> 标成英文，浏览器会自动"翻译"，
+# 翻译插件改写页面会让 Streamlit 白屏。这里把语言改成中文并禁止翻译。
+components.html(
+    """<script>
+    const d = window.parent.document;
+    d.documentElement.lang = "zh-CN";
+    d.documentElement.setAttribute("translate", "no");
+    d.documentElement.classList.add("notranslate");
+    if (!d.querySelector('meta[name="google"]')) {
+      const m = d.createElement("meta"); m.name = "google"; m.content = "notranslate"; d.head.appendChild(m);
+    }
+    </script>""",
+    height=0,
+)
 
 LEVEL_LABEL = {Level.L3: "承诺", Level.L4: "付费"}
 LABEL_LEVEL = {v: k for k, v in LEVEL_LABEL.items()}

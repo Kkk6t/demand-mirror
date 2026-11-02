@@ -7,7 +7,6 @@ import html
 from .models import DESK_RESEARCH_MAX, LEVEL_HINTS, LEVEL_NAMES, Evidence, Level, Observation, Stance, Status
 
 CSS = """
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --paper: #F6F8FB;
@@ -22,12 +21,12 @@ CSS = """
   --mark: #FFF1B8;
 }
 html, body, [class*="css"], .stMarkdown, .stTextArea textarea, .stTextInput input, button {
-  font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;
 }
 .stApp { background: var(--paper); color: var(--ink); }
 [data-testid="stSidebar"] { background: #EDF1F6; border-right: 1px solid var(--rule); }
 .block-container { max-width: 900px; padding-top: 2.2rem; }
-h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Songti SC", serif !important; color: var(--ink); letter-spacing: 0; }
+h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", "宋体", serif !important; color: var(--ink); letter-spacing: 0; }
 
 /* 抬头 */
 .masthead { border-bottom: 3px double var(--ink); padding-bottom: .9rem; margin-bottom: 1.6rem; }
@@ -39,7 +38,7 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 /* 步骤抬头：像表格的栏目 */
 .step { display: grid; grid-template-columns: 2.4rem 1fr auto; align-items: baseline;
         border-top: 1px solid var(--ink); padding-top: .7rem; margin: 2.2rem 0 .6rem; }
-.step .n { font-family: "Noto Serif SC", "Noto Serif CJK SC", serif; font-weight: 900; font-size: 1.5rem; color: var(--ink); }
+.step .n { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-weight: 900; font-size: 1.5rem; color: var(--ink); }
 .step h3 { margin: 0; padding: 0; font-size: 1.3rem; font-weight: 600; }
 .step .s { font-size: .82rem; color: var(--muted); }
 .step.todo { border-top-color: var(--rule); }
@@ -47,7 +46,7 @@ h1, h2, h3, .serif, .masthead h1, .step h3 { font-family: "Noto Serif SC", "Noto
 .lede { color: var(--muted); font-size: .95rem; margin: 0 0 .8rem 2.4rem; max-width: 70ch; }
 
 /* 印章：整个界面唯一大胆的元素 */
-.stamp { display: inline-block; font-family: "Noto Serif SC", "Noto Serif CJK SC", serif; font-weight: 900;
+.stamp { display: inline-block; font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-weight: 900;
          font-size: 1.55rem; padding: .45rem 1.1rem; border: 4px double currentColor;
          border-radius: 6px; transform: rotate(-7deg); letter-spacing: .12em; opacity: .92;
          mix-blend-mode: multiply; }
@@ -86,12 +85,12 @@ table.ledger { width: 100%; border-collapse: collapse; font-size: .9rem; margin:
 .lv { font-size: .76rem; color: var(--muted); margin-left: .3rem; }
 
 /* 标准、帖子 */
-.rule-line { font-family: "Noto Serif SC", "Noto Serif CJK SC", serif; font-size: 1.05rem; padding: .45rem 0; border-bottom: 1px solid var(--rule-soft); }
+.rule-line { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-size: 1.05rem; padding: .45rem 0; border-bottom: 1px solid var(--rule-soft); }
 .rule-line .lv { font-family: "Noto Sans SC", sans-serif; }
 .meta { font-size: .82rem; color: var(--muted); }
 .post { background: var(--sheet); border: 1px solid var(--rule); border-radius: 4px; padding: .9rem 1rem; margin-bottom: .8rem; }
 .post .ch { font-weight: 700; font-size: .85rem; }
-.post .t { font-family: "Noto Serif SC", "Noto Serif CJK SC", serif; font-weight: 600; font-size: 1.05rem; margin: .3rem 0; }
+.post .t { font-family: "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif; font-weight: 600; font-size: 1.05rem; margin: .3rem 0; }
 .post .b { font-size: .92rem; line-height: 1.75; }
 .post .cta { margin-top: .6rem; padding: .45rem .6rem; border-left: 3px solid var(--ink); background: #F1F4F8; font-size: .9rem; }
 .guard { font-size: .82rem; color: var(--muted); }
